@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicroBeat: A Pista de Mordor</title>
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-green: #a8ff78;
+            --neon-orange: #ff7e00;
+            --neon-red: #ff0000;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background-image: url('Gemini_Generated_Image_y1cw6gy1cw6gy1cw.png');
+            background-size: 100% 100%; background-position: center bottom;
+            background-repeat: no-repeat; color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh; overflow: hidden; user-select: none;
+            background-color: #050505;
+        }
+
+        /* PLACAR E COMBOS */
+        #top-left-mask {
+            position: absolute; top: 70px; left: 30px; width: 250px; height: 140px;
+            background: radial-gradient(circle, rgba(5,10,15,0.95) 40%, rgba(5,10,15,0) 100%);
+            display: flex; flex-direction: column; justify-content: center; padding-left: 20px;
+        }
+        #score-value { font-size: 3.5rem; font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); line-height: 1.2; }
+        #multiplier-value { font-size: 2.5rem; font-weight: bold; color: #88c0d0; text-shadow: 0 0 10px #88c0d0; }
+
+        #top-right-mask {
+            position: absolute; top: 70px; right: 40px; width: 200px; height: 230px;
+            background: radial-gradient(circle, rgba(5,10,15,0.95) 40%, rgba(5,10,15,0) 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .combo-title { color: var(--neon-green); font-weight: bold; font-size: 1.2rem; text-shadow: 0 0 10px var(--neon-green); text-align: center; margin-bottom: 15px; }
+        .combo-circle {
+            width: 120px; height: 120px; border-radius: 50%; border: 5px solid var(--neon-orange);
+            background: #0a0a0a; box-shadow: 0 0 20px var(--neon-orange), inset 0 0 15px var(--neon-orange);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        #combo-value { font-size: 2.5rem; font-weight: bold; color: #fff; text-shadow: 0 0 10px #ffcc00; }
+        .combo-label { color: var(--neon-orange); font-size: 0.9rem; }
+
+        /* ESPECIAL */
+        #special-panel {
+            position: absolute; bottom: 30px; right: 40px; width: 280px;
+            background: rgba(15, 5, 5, 0.9); border: 2px solid #550000; border-radius: 12px;
+            padding: 18px; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); z-index: 50;
+        }
+        .special-title { font-size: 1.1rem; color: #ff5555; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px; text-shadow: 0 0 10px #ff0000; }
+        #special-container { width: 100%; height: 30px; background: #111; border: 2px solid #333; border-radius: 6px; position: relative; box-shadow: inset 0 0 15px #000; overflow: hidden; }
+        #special-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #880000, #ff0000, #ffaa00); box-shadow: 0 0 15px #ff0000; transition: width 0.1s; }
+        .special-ready { border-color: #ff0000 !important; box-shadow: 0 0 30px #ff0000 !important; animation: pulse-red 0.5s infinite alternate; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 10px #ff0000; } 100% { box-shadow: 0 0 40px #ff0000, 0 0 20px #ffaa00; } }
+        #special-hint { font-size: 0.9rem; color: #ffaa00; margin-top: 8px; font-weight: bold; opacity: 0; transition: opacity 0.3s; }
+
+        /* MENU DE CONFIGURAÇÃO */
+        #config-panel {
+            position: absolute; bottom: 20px; left: 20px; width: 330px;
+            background: rgba(5, 10, 15, 0.95); border: 1px solid var(--neon-blue);
+            padding: 15px 20px; border-radius: 8px; z-index: 100;
+            display: flex; flex-direction: column; gap: 12px;
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.3);
+        }
+        .config-section h4 { margin: 0 0 8px 0; font-size: 0.85rem; color: var(--neon-blue); text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        
+        .style-toggle { display: flex; gap: 10px; }
+        .style-btn { flex: 1; background: #111; color: #aaa; border: 1px solid #333; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; transition: 0.2s; }
+        .style-btn.active { background: var(--neon-blue); color: #000; border-color: var(--neon-blue); font-weight: bold; box-shadow: 0 0 10px var(--neon-blue); }
+        
+        .key-config { display: flex; justify-content: space-between; }
+        .key-input { width: 35px; height: 35px; background: #111; color: var(--neon-green); border: 1px solid var(--neon-green); border-radius: 4px; text-align: center; font-size: 1.2rem; font-weight: bold; text-transform: uppercase; }
+        
+        .input-group { display: flex; gap: 8px; align-items: center; }
+        .input-group input[type="text"], .input-group input[type="number"] { background: #111; border: 1px solid #444; color: #fff; padding: 6px 10px; border-radius: 4px; flex: 1; font-size: 0.85rem; }
+        .input-group input[type="number"] { flex: 0.4; text-align: center; color: var(--neon-orange); font-weight: bold; }
+        .btn-action { background: var(--neon-blue); color: #000; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
+        .btn-action:hover { box-shadow: 0 0 15px var(--neon-blue); }
+
+        #btn-open-config {
+            position: absolute; bottom: 20px; left: 20px;
+            background: rgba(0, 0, 0, 0.8); border: 2px solid var(--neon-blue); color: var(--neon-blue);
+            padding: 10px 15px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer;
+            z-index: 90; display: none; box-shadow: 0 0 15px rgba(0, 210, 255, 0.3); transition: 0.2s;
+        }
+        #btn-open-config:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+
+        /* DIFICULDADE */
+        #difficulty-panel { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 100; background: rgba(0, 0, 0, 0.85); padding: 8px 18px; border-radius: 10px; border: 1px solid var(--neon-blue); }
+        .diff-btn { background: #111; color: #aaa; border: 2px solid #333; padding: 6px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.2s; }
+        .diff-btn.active { background: var(--neon-blue); color: #000; border-color: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); }
+
+        /* A PISTA DO JOGO */
+        #highway-container {
+            position: absolute; bottom: 210px; left: 50%; transform: translateX(-50%) perspective(250px); 
+            width: 750px; height: 55vh; display: flex; justify-content: center; align-items: flex-end; pointer-events: none;
+        }
+        canvas { transform: rotateX(60deg); transform-origin: bottom center; background: rgba(5, 7, 10, 0.95); border-left: 10px solid var(--neon-blue); border-right: 10px solid var(--neon-blue); box-shadow: 0 -40px 80px rgba(0, 0, 0, 1) inset; }
+        #yt-player-container { position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+        /* TELA FINAL */
+        #end-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        .end-panel { background: #111; border: 2px solid var(--neon-blue); padding: 40px 60px; border-radius: 15px; text-align: center; box-shadow: 0 0 50px rgba(0, 210, 255, 0.3); }
+        .end-title { font-size: 3rem; color: var(--neon-blue); margin-bottom: 20px; text-transform: uppercase; text-shadow: 0 0 20px var(--neon-blue); }
+        .stat-row { display: flex; justify-content: space-between; width: 300px; margin: 10px auto; font-size: 1.2rem; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .stat-label { color: #aaa; } .stat-val { font-weight: bold; color: #fff; }
+        .val-perfect { color: var(--neon-blue); } .val-good { color: var(--neon-green); } .val-ok { color: #fff; } .val-miss { color: var(--neon-red); }
+        .btn-restart { margin-top: 30px; background: transparent; color: var(--neon-blue); border: 2px solid var(--neon-blue); padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        .btn-restart:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+        
+        #sync-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.4); z-index: 500; display: none; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div id="yt-player-container"><div id="yt-player"></div></div>
+    <div id="sync-flash"></div> 
+
+    <div id="end-screen">
+        <div class="end-panel">
+            <div class="end-title">Análise Concluída</div>
+            <div class="stat-row"><span class="stat-label">Pontuação Total:</span> <span class="stat-val" id="final-score">0</span></div>
+            <div class="stat-row"><span class="stat-label">Maior Combo:</span> <span class="stat-val" id="final-max-combo">0</span></div><br>
+            <div class="stat-row"><span class="stat-label">Perfects:</span> <span class="stat-val val-perfect" id="final-perfect">0</span></div>
+            <div class="stat-row"><span class="stat-label">Goods:</span> <span class="stat-val val-good" id="final-good">0</span></div>
+            <div class="stat-row"><span class="stat-label">OKs:</span> <span class="stat-val val-ok" id="final-ok">0</span></div>
+            <div class="stat-row"><span class="stat-label">Misses:</span> <span class="stat-val val-miss" id="final-miss">0</span></div>
+            <button class="btn-restart" onclick="closeEndScreen()">Voltar ao Menu</button>
+        </div>
+    </div>
+
+    <div id="difficulty-panel">
+        <button class="diff-btn" onclick="setDifficulty('Fácil')">Fácil</button>
+        <button class="diff-btn active" onclick="setDifficulty('Médio')">Médio</button>
+        <button class="diff-btn" onclick="setDifficulty('Difícil')">Difícil</button>
+        <button class="diff-btn" onclick="setDifficulty('Expert')">Expert</button>
+    </div>
+
+    <button id="btn-open-config" onclick="openConfigMenu()">⚙️ Menu / Restart</button>
+
+    <div id="config-panel">
+        <div class="config-section">
+            <h4>🎮 Visual das Notas</h4>
+            <div class="style-toggle">
+                <button id="btn-desenho" class="style-btn active" onclick="setNoteStyle('desenho')">Desenhos</button>
+                <button id="btn-tracinho" class="style-btn" onclick="setNoteStyle('tracinho')">Tracinhos</button>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h4>⌨️ Configurar Teclas</h4>
+            <div class="key-config">
+                <input type="text" class="key-input" id="key0" value="A" maxlength="1" onchange="updateKeys()">
+                <input type="text" class="key-input" id="key1" value="S" maxlength="1" onchange="updateKeys()">
+                <input type="text" class="key-input" id="key2" value="D" maxlength="1" onchange="updateKeys()">
+                <input type="text" class="key-input" id="key3" value="J" maxlength="1" onchange="updateKeys()">
+                <input type="text" class="key-input" id="key4" value="K" maxlength="1" onchange="updateKeys()">
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h4>🎵 Sincronia e Áudio</h4>
+            <div class="input-group">
+                <span style="color:#aaa; font-size:0.8rem;">BPM Inicial:</span>
+                <input type="number" id="bpmInput" value="120" min="40" max="300" onchange="updateBPM()">
+            </div>
+            <div style="font-size: 0.7rem; color: #ffaa00; margin-top: 5px;">*Mudou o ritmo? Aperte ENTER 4 vezes na nova batida para ressincronizar!*</div>
+            <div class="input-group" style="margin-top: 8px;">
+                <input type="text" id="ytUrlInput" placeholder="URL ou ID do YouTube...">
+                <button class="btn-action" onclick="loadYouTubeVideo()">Tocar</button>
+            </div>
+            <input type="file" id="audioUpload" accept="audio/mp3, audio/wav" style="color: #aaa; font-size: 0.8rem; margin-top: 5px;">
+            <audio id="bgm"></audio>
+        </div>
+    </div>
+
+    <div id="top-left-mask"><div id="score-value">0</div><div id="multiplier-value">X1</div></div>
+    <div id="top-right-mask">
+        <div class="combo-title">PRECIOUS<br>COMBO</div>
+        <div class="combo-circle"><div id="combo-value">0</div><div class="combo-label">Combo</div></div>
+    </div>
+    <div id="special-panel">
+        <div class="special-title">SANGUE DE MORDOR</div>
+        <div id="special-container"><div id="special-bar"></div></div>
+        <div id="special-hint">APERTE ESPAÇO!</div>
+    </div>
+
+    <div id="highway-container">
+        <canvas id="gameCanvas" width="900" height="1200"></canvas>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const audio = document.getElementById('bgm');
+        const audioUpload = document.getElementById('audioUpload');
+        const configPanel = document.getElementById('config-panel');
+        const btnOpenConfig = document.getElementById('btn-open-config');
+        const syncFlash = document.getElementById('sync-flash');
+
+        const scoreUI = document.getElementById('score-value');
+        const comboUI = document.getElementById('combo-value');
+        const multiplierUI = document.getElementById('multiplier-value');
+        const specialBar = document.getElementById('special-bar');
+        const specialContainer = document.getElementById('special-container');
+        const specialHint = document.getElementById('special-hint');
+
+        const numLanes = 5;
+        const laneWidth = canvas.width / numLanes;
+        const hitZoneY = 1050; 
+        
+        let keys = ['a', 's', 'd', 'j', 'k'];
+        let activeKeys = [false, false, false, false, false];
+        let noteStyle = 'desenho'; // Garantido!
+        let bpm = 120;
+        let spawnIntervalSec = 60 / bpm; 
+        
+        let tapTimes = [];
+
+        function updateKeys() {
+            for(let i = 0; i < 5; i++) {
+                let val = document.getElementById('key'+i).value.toLowerCase();
+                keys[i] = val ? val : keys[i]; 
+            }
+        }
+
+        function setNoteStyle(style) {
+            noteStyle = style;
+            document.getElementById('btn-desenho').classList.remove('active');
+            document.getElementById('btn-tracinho').classList.remove('active');
+            document.getElementById('btn-' + style).classList.add('active');
+        }
+
+        function updateBPM() {
+            let inputBpm = parseInt(document.getElementById('bpmInput').value);
+            if(inputBpm > 0) {
+                bpm = inputBpm;
+                spawnIntervalSec = 60 / bpm;
+            }
+        }
+
+        const laneConfig = [
+            { color: '#ff7e00', type: 'bacilo' },
+            { color: '#00ffcc', type: 'virus' }, 
+            { color: '#ff0055', type: 'sauron' }, 
+            { color: '#a8ff78', type: 'bacilo' },
+            { color: '#b829ff', type: 'virus' }  
+        ];
+
+        let notes = [];
+        let fretOffset = 0; 
+        let hitEffects = [];
+        let isPlaying = false;
+        let audioMode = 'mp3'; 
+        
+        let speedFactor = 800; 
+        let nextBeatTime = 0;
+        let lookAheadTime = 2.5; 
+        
+        let score = 0, combo = 0, baseMultiplier = 1, maxCombo = 0;
+        let stats = { perfect: 0, good: 0, ok: 0, miss: 0 };
+        
+        let propulsion = 0; 
+        let isPropulsionActive = false;
+        const MAX_PROPULSION = 100;
+
+        let ytPlayer;
+        let isYtApiReady = false;
+
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('yt-player', {
+                height: '1', width: '1',
+                events: {
+                    'onReady': () => { isYtApiReady = true; },
+                    'onStateChange': onYtPlayerStateChange
+                }
+            });
+        }
+
+        function extractVideoId(url) {
+            if (!url) return null;
+            if (url.length === 11 && !url.includes('/')) return url;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        function getAudioTime() {
+            if (!isPlaying) return 0;
+            if (audioMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+                return ytPlayer.getCurrentTime();
+            }
+            if (audioMode === 'mp3') return audio.currentTime;
+            return 0;
+        }
+
+        function startGame() {
+            configPanel.style.display = 'none';
+            btnOpenConfig.style.display = 'block';
+            isPlaying = true;
+            nextBeatTime = 0; // Será definido assim que o áudio for > 0.1s
+        }
+
+        function openConfigMenu() {
+            isPlaying = false;
+            audio.pause();
+            if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+            btnOpenConfig.style.display = 'none';
+            configPanel.style.display = 'flex';
+            resetGameState();
+        }
+
+        function loadYouTubeVideo() {
+            const videoId = extractVideoId(document.getElementById('ytUrlInput').value.trim());
+            if (!videoId) return alert("Link ou ID do YouTube inválido.");
+            if (!isYtApiReady || !ytPlayer) return alert("API carregando... Aguarde um segundo.");
+
+            updateBPM();
+            audio.pause();
+            audioMode = 'youtube';
+            resetGameState();
+            ytPlayer.loadVideoById(videoId);
+            ytPlayer.playVideo();
+            startGame();
+        }
+
+        function onYtPlayerStateChange(event) {
+            if (event.data === 0) triggerEndScreen(); 
+        }
+
+        audioUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
+                updateBPM();
+                audioMode = 'mp3';
+                audio.src = URL.createObjectURL(file);
+                resetGameState();
+                audio.play();
+                startGame();
+            }
+        });
+
+        audio.addEventListener('ended', triggerEndScreen);
+
+        function triggerEndScreen() {
+            isPlaying = false;
+            document.getElementById('final-score').innerText = score.toLocaleString('en-US');
+            document.getElementById('final-max-combo').innerText = maxCombo;
+            document.getElementById('final-perfect').innerText = stats.perfect;
+            document.getElementById('final-good').innerText = stats.good;
+            document.getElementById('final-ok').innerText = stats.ok;
+            document.getElementById('final-miss').innerText = stats.miss;
+            document.getElementById('end-screen').style.display = 'flex';
+        }
+
+        function closeEndScreen() {
+            document.getElementById('end-screen').style.display = 'none';
+            openConfigMenu();
+        }
+
+        function setDifficulty(level) {
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (level === 'Fácil') { speedFactor = 600; } 
+            else if (level === 'Médio') { speedFactor = 800; } 
+            else if (level === 'Difícil') { speedFactor = 1100; } 
+            else if (level === 'Expert') { speedFactor = 1500; }
+        }
+
+        function resetGameState() {
+            notes = []; score = 0; combo = 0; baseMultiplier = 1; maxCombo = 0;
+            propulsion = 0; isPropulsionActive = false; tapTimes = [];
+            stats = { perfect: 0, good: 0, ok: 0, miss: 0 };
+            updateUI();
+        }
+
+        function updateUI() {
+            scoreUI.innerText = score.toLocaleString('en-US');
+            comboUI.innerText = combo;
+            
+            let currentMultiplier = isPropulsionActive ? baseMultiplier * 2 : baseMultiplier;
+            multiplierUI.innerText = 'X' + currentMultiplier;
+            multiplierUI.style.color = isPropulsionActive ? '#ffaa00' : '#88c0d0';
+            multiplierUI.style.textShadow = isPropulsionActive ? '0 0 20px #ff0000' : '0 0 10px #88c0d0';
+
+            specialBar.style.width = propulsion + '%';
+            if (propulsion >= MAX_PROPULSION && !isPropulsionActive) {
+                specialContainer.classList.add('special-ready');
+                specialHint.style.opacity = 1;
+            } else {
+                specialContainer.classList.remove('special-ready');
+                specialHint.style.opacity = 0;
+            }
+        }
+
+        // DESENHOS
+        function drawBacilo(ctx, x, y, color) {
+            ctx.fillStyle = color; ctx.shadowBlur = 15; ctx.shadowColor = color;
+            ctx.beginPath(); ctx.ellipse(x, y, 22, 45, Math.PI / 4, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.ellipse(x, y, 8, 20, Math.PI / 4, 0, Math.PI * 2); ctx.fill();
+        }
+        function drawVirus(ctx, x, y, color) {
+            ctx.fillStyle = color; ctx.shadowBlur = 20; ctx.shadowColor = color;
+            ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = color; ctx.lineWidth = 6;
+            for(let i = 0; i < 8; i++) {
+                let angle = (Math.PI * 2 / 8) * i;
+                ctx.beginPath(); ctx.moveTo(x, y);
+                ctx.lineTo(x + Math.cos(angle) * 50, y + Math.sin(angle) * 50); ctx.stroke();
+            }
+            ctx.fillStyle = '#fff'; ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI * 2); ctx.fill();
+        }
+        function drawSauron(ctx, x, y) {
+            ctx.fillStyle = '#ff0000'; ctx.shadowBlur = 30; ctx.shadowColor = '#ff7e00';
+            ctx.beginPath(); ctx.arc(x, y, 45, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#ffcc00'; ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.arc(x, y, 35, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#330000';
+            ctx.beginPath(); ctx.ellipse(x, y, 8, 26, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        function drawTracinho(ctx, x, y, color) {
+            ctx.fillStyle = color; ctx.shadowBlur = 25; ctx.shadowColor = color;
+            ctx.fillRect(x - 55, y - 12, 110, 24); 
+            ctx.fillStyle = '#fff'; ctx.shadowBlur = 0;
+            ctx.fillRect(x - 40, y - 5, 80, 10); 
+        }
+
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let currentTime = getAudioTime();
+
+            if (isPlaying && currentTime > 0.1) {
+                // Se a música começou a tocar agora e nextBeatTime é 0, inicializa.
+                // Se o tempo da música pular muito para frente, ajusta para não criar uma parede de notas.
+                if (nextBeatTime < currentTime) {
+                    nextBeatTime = currentTime + lookAheadTime; 
+                }
+
+                while (nextBeatTime < currentTime + lookAheadTime) {
+                    const laneIndex = Math.floor(Math.random() * numLanes);
+                    notes.push({
+                        targetTime: nextBeatTime,
+                        lane: laneIndex,
+                        config: laneConfig[laneIndex]
+                    });
+                    nextBeatTime += spawnIntervalSec; 
+                }
+            }
+
+            if (isPropulsionActive) {
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                propulsion -= 0.12; 
+                if (propulsion <= 0) { propulsion = 0; isPropulsionActive = false; }
+                updateUI();
+            }
+
+            if (combo > 5) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+                ctx.font = 'bold 350px "Segoe UI"'; ctx.textAlign = 'center';
+                ctx.fillText(combo, canvas.width / 2, canvas.height / 2 + 100); ctx.textAlign = 'left';
+            }
+
+            fretOffset += (speedFactor / 60); 
+            if (fretOffset > 250) fretOffset = 0; 
+            ctx.strokeStyle = isPropulsionActive ? 'rgba(255, 100, 100, 0.4)' : 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 5;
+            for (let y = fretOffset - 250; y < canvas.height; y += 250) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+            }
+
+            for(let i = 1; i < numLanes; i++) {
+                ctx.strokeStyle = isPropulsionActive ? '#ff0000' : 'rgba(255, 255, 255, 0.5)';
+                ctx.shadowBlur = isPropulsionActive ? 25 : 10; ctx.shadowColor = isPropulsionActive ? '#ff0000' : '#fff';
+                ctx.lineWidth = 6;
+                ctx.beginPath(); ctx.moveTo(i * laneWidth, 0); ctx.lineTo(i * laneWidth, canvas.height); ctx.stroke();
+            }
+            ctx.shadowBlur = 0; 
+
+            for (let i = 0; i < numLanes; i++) {
+                const laneCenter = (i * laneWidth) + (laneWidth / 2);
+                ctx.strokeStyle = laneConfig[i].color;
+                ctx.lineWidth = activeKeys[i] ? 15 : 6;
+                ctx.shadowBlur = activeKeys[i] ? 30 : 10; ctx.shadowColor = laneConfig[i].color;
+                
+                ctx.beginPath(); ctx.ellipse(laneCenter, hitZoneY, 65, 30, 0, 0, Math.PI * 2); ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                if (activeKeys[i]) {
+                    let grad = ctx.createLinearGradient(0, hitZoneY, 0, 0);
+                    grad.addColorStop(0, laneConfig[i].color); grad.addColorStop(1, 'transparent');
+                    ctx.fillStyle = grad; ctx.globalAlpha = 0.8;
+                    ctx.fillRect(i * laneWidth, 0, laneWidth, hitZoneY); ctx.globalAlpha = 1.0;
+                }
+
+                ctx.fillStyle = activeKeys[i] ? '#ffffff' : 'rgba(255, 255, 255, 0.5)';
+                ctx.font = 'bold 50px "Segoe UI"'; ctx.textAlign = 'center';
+                ctx.fillText(keys[i].toUpperCase(), laneCenter, hitZoneY + 15); ctx.textAlign = 'left'; 
+            }
+
+            for (let i = 0; i < notes.length; i++) {
+                let note = notes[i];
+                let timeDifference = note.targetTime - currentTime;
+                
+                note.y = hitZoneY - (timeDifference * speedFactor);
+                let noteX = (note.lane * laneWidth) + (laneWidth / 2); // CORREÇÃO DA COORDENADA X AQUI
+
+                let gradient = ctx.createLinearGradient(0, note.y, 0, note.y - 150);
+                gradient.addColorStop(0, isPropulsionActive ? '#ff0000' : note.config.color);
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient; ctx.globalAlpha = 0.6;
+                ctx.fillRect(noteX - 20, note.y - 150, 40, 150);
+                ctx.globalAlpha = 1.0;
+
+                // AGORA OS DESENHOS RECEBEM O VALOR DE 'X' CORRETO!
+                if (noteStyle === 'desenho') {
+                    if (note.config.type === 'bacilo') drawBacilo(ctx, noteX, note.y, note.config.color);
+                    else if (note.config.type === 'virus') drawVirus(ctx, noteX, note.y, note.config.color);
+                    else if (note.config.type === 'sauron') drawSauron(ctx, noteX, note.y);
+                } else {
+                    drawTracinho(ctx, noteX, note.y, note.config.color);
+                }
+
+                if (timeDifference < -0.25) {
+                    notes.splice(i, 1); i--;
+                    combo = 0; baseMultiplier = 1; stats.miss++;
+                    updateUI();
+                }
+            }
+
+            for (let i = 0; i < hitEffects.length; i++) {
+                let effect = hitEffects[i];
+                ctx.fillStyle = '#fff'; ctx.font = 'bold 70px "Segoe UI"'; ctx.textAlign = 'center';
+                ctx.shadowBlur = 25; ctx.shadowColor = effect.color;
+                ctx.lineWidth = 4; ctx.strokeStyle = '#000';
+                ctx.strokeText(effect.text, effect.x, effect.y); ctx.fillText(effect.text, effect.x, effect.y);
+                ctx.shadowBlur = 0; effect.y -= 3; effect.life--; 
+                if (effect.life <= 0) { hitEffects.splice(i, 1); i--; }
+            }
+            ctx.textAlign = 'left';
+            requestAnimationFrame(update);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.repeat) return; 
+
+            // TAP TEMPO (A versão anterior de 4 batidas, arredondada)
+            if (e.key === 'Enter' && isPlaying) {
+                let now = getAudioTime();
+                tapTimes.push(now);
+                if (tapTimes.length > 4) tapTimes.shift(); 
+                
+                if (tapTimes.length >= 2) {
+                    let sum = 0;
+                    for (let i = 1; i < tapTimes.length; i++) sum += (tapTimes[i] - tapTimes[i-1]);
+                    let avgInterval = sum / (tapTimes.length - 1);
+                    let newBpm = Math.round(60 / avgInterval);
+                    
+                    if (newBpm >= 60 && newBpm <= 300) {
+                        bpm = newBpm;
+                        spawnIntervalSec = 60 / bpm;
+                        nextBeatTime = now + lookAheadTime; 
+                        document.getElementById('bpmInput').value = bpm;
+                        
+                        syncFlash.style.display = 'block';
+                        setTimeout(() => syncFlash.style.display = 'none', 100);
+                    }
+                }
+                return;
+            }
+
+            if (e.key === ' ') {
+                e.preventDefault(); 
+                if (propulsion >= MAX_PROPULSION && !isPropulsionActive) {
+                    isPropulsionActive = true;
+                    requestAnimationFrame(updateUI);
+                }
+                return;
+            }
+
+            const key = e.key.toLowerCase(); 
+            const laneIndex = keys.indexOf(key);
+            let currentTime = getAudioTime();
+
+            if (laneIndex !== -1 && !activeKeys[laneIndex]) {
+                activeKeys[laneIndex] = true; 
+
+                for (let i = 0; i < notes.length; i++) {
+                    let note = notes[i];
+                    let diffTime = Math.abs(note.targetTime - currentTime);
+                    
+                    if (note.lane === laneIndex && diffTime <= 0.15) { 
+                        combo++;
+                        if (combo > maxCombo) maxCombo = combo;
+                        
+                        if (!isPropulsionActive) {
+                            propulsion += 3.5; 
+                            if (propulsion > MAX_PROPULSION) propulsion = MAX_PROPULSION;
+                        }
+                        
+                        let points = 0;
+                        let hitText = '';
+                        if (diffTime < 0.05) { points = 20; hitText = 'PERFECT!'; stats.perfect++; } 
+                        else if (diffTime < 0.10) { points = 10; hitText = 'GOOD!'; stats.good++; } 
+                        else { points = 5; hitText = 'OK'; stats.ok++; }
+
+                        if (combo >= 30) baseMultiplier = 4;
+                        else if (combo >= 15) baseMultiplier = 3;
+                        else if (combo >= 5) baseMultiplier = 2;
+
+                        let currentMultiplier = isPropulsionActive ? baseMultiplier * 2 : baseMultiplier;
+                        score += (points * currentMultiplier);
+                        
+                        hitEffects.push({
+                            text: hitText,
+                            x: (laneIndex * laneWidth) + (laneWidth / 2),
+                            y: hitZoneY - 80,
+                            color: isPropulsionActive ? '#ff0000' : note.config.color,
+                            life: 45
+                        });
+
+                        notes.splice(i, 1); 
+                        requestAnimationFrame(updateUI);
+                        break; 
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            const laneIndex = keys.indexOf(key);
+            if (laneIndex !== -1) activeKeys[laneIndex] = false;
+        });
+
+        setNoteStyle('desenho');
+        updateUI();
+        update();
+    </script>
+</body>
+</html>
