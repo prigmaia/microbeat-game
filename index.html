@@ -22,6 +22,24 @@
             background-color: #050505;
         }
 
+        /* ASSINATURA DA AUTORA */
+        #signature {
+            position: absolute;
+            bottom: 15px;
+            right: 25px;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            z-index: 1000;
+            pointer-events: none;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        #signature span {
+            color: var(--neon-blue);
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
         /* PLACAR E COMBOS */
         #top-left-mask {
             position: absolute; top: 70px; left: 30px; width: 250px; height: 140px;
@@ -116,6 +134,14 @@
     </style>
 </head>
 <body>
+
+    <!-- 
+    ========================================================================
+    MicroBeat: A Pista de Mordor
+    Desenvolvido por: Priscila Maia
+    ========================================================================
+    -->
+    <div id="signature">by: <span>Priscila Maia</span></div>
 
     <div id="yt-player-container"><div id="yt-player"></div></div>
     <div id="sync-flash"></div> 
@@ -217,7 +243,7 @@
         
         let keys = ['a', 's', 'd', 'j', 'k'];
         let activeKeys = [false, false, false, false, false];
-        let noteStyle = 'desenho'; // Garantido!
+        let noteStyle = 'desenho'; // Garantido
         let bpm = 120;
         let spawnIntervalSec = 60 / bpm; 
         
@@ -262,6 +288,7 @@
         let speedFactor = 800; 
         let nextBeatTime = 0;
         let lookAheadTime = 2.5; 
+        let firstBeatInitialized = false;
         
         let score = 0, combo = 0, baseMultiplier = 1, maxCombo = 0;
         let stats = { perfect: 0, good: 0, ok: 0, miss: 0 };
@@ -304,7 +331,7 @@
             configPanel.style.display = 'none';
             btnOpenConfig.style.display = 'block';
             isPlaying = true;
-            nextBeatTime = 0; // Será definido assim que o áudio for > 0.1s
+            firstBeatInitialized = false; 
         }
 
         function openConfigMenu() {
@@ -401,7 +428,7 @@
             }
         }
 
-        // DESENHOS
+        // DESENHOS À PROVA DE FALHAS
         function drawBacilo(ctx, x, y, color) {
             ctx.fillStyle = color; ctx.shadowBlur = 15; ctx.shadowColor = color;
             ctx.beginPath(); ctx.ellipse(x, y, 22, 45, Math.PI / 4, 0, Math.PI * 2); ctx.fill();
@@ -439,21 +466,22 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             let currentTime = getAudioTime();
 
-            if (isPlaying && currentTime > 0.1) {
-                // Se a música começou a tocar agora e nextBeatTime é 0, inicializa.
-                // Se o tempo da música pular muito para frente, ajusta para não criar uma parede de notas.
-                if (nextBeatTime < currentTime) {
-                    nextBeatTime = currentTime + lookAheadTime; 
+            if (isPlaying) {
+                if (currentTime > 0.1 && !firstBeatInitialized) {
+                    firstBeatInitialized = true;
+                    nextBeatTime = currentTime + lookAheadTime;
                 }
 
-                while (nextBeatTime < currentTime + lookAheadTime) {
-                    const laneIndex = Math.floor(Math.random() * numLanes);
-                    notes.push({
-                        targetTime: nextBeatTime,
-                        lane: laneIndex,
-                        config: laneConfig[laneIndex]
-                    });
-                    nextBeatTime += spawnIntervalSec; 
+                if (firstBeatInitialized) {
+                    while (nextBeatTime < currentTime + lookAheadTime) {
+                        const laneIndex = Math.floor(Math.random() * numLanes);
+                        notes.push({
+                            targetTime: nextBeatTime,
+                            lane: laneIndex,
+                            config: laneConfig[laneIndex]
+                        });
+                        nextBeatTime += spawnIntervalSec; 
+                    }
                 }
             }
 
@@ -513,7 +541,7 @@
                 let timeDifference = note.targetTime - currentTime;
                 
                 note.y = hitZoneY - (timeDifference * speedFactor);
-                let noteX = (note.lane * laneWidth) + (laneWidth / 2); // CORREÇÃO DA COORDENADA X AQUI
+                let noteX = (note.lane * laneWidth) + (laneWidth / 2); 
 
                 let gradient = ctx.createLinearGradient(0, note.y, 0, note.y - 150);
                 gradient.addColorStop(0, isPropulsionActive ? '#ff0000' : note.config.color);
@@ -522,7 +550,7 @@
                 ctx.fillRect(noteX - 20, note.y - 150, 40, 150);
                 ctx.globalAlpha = 1.0;
 
-                // AGORA OS DESENHOS RECEBEM O VALOR DE 'X' CORRETO!
+                // LÓGICA DE EXIBIÇÃO GARANTIDA (Desenho / Tracinho)
                 if (noteStyle === 'desenho') {
                     if (note.config.type === 'bacilo') drawBacilo(ctx, noteX, note.y, note.config.color);
                     else if (note.config.type === 'virus') drawVirus(ctx, noteX, note.y, note.config.color);
@@ -554,21 +582,21 @@
         window.addEventListener('keydown', (e) => {
             if (e.repeat) return; 
 
-            // TAP TEMPO (A versão anterior de 4 batidas, arredondada)
+            // TAP TEMPO PRECISO
             if (e.key === 'Enter' && isPlaying) {
                 let now = getAudioTime();
                 tapTimes.push(now);
-                if (tapTimes.length > 4) tapTimes.shift(); 
+                if (tapTimes.length > 8) tapTimes.shift(); 
                 
                 if (tapTimes.length >= 2) {
                     let sum = 0;
                     for (let i = 1; i < tapTimes.length; i++) sum += (tapTimes[i] - tapTimes[i-1]);
                     let avgInterval = sum / (tapTimes.length - 1);
-                    let newBpm = Math.round(60 / avgInterval);
+                    let newBpm = 60 / avgInterval;
                     
-                    if (newBpm >= 60 && newBpm <= 300) {
-                        bpm = newBpm;
-                        spawnIntervalSec = 60 / bpm;
+                    if (newBpm >= 40 && newBpm <= 300) {
+                        bpm = parseFloat(newBpm.toFixed(1));
+                        spawnIntervalSec = avgInterval;
                         nextBeatTime = now + lookAheadTime; 
                         document.getElementById('bpmInput').value = bpm;
                         
@@ -643,6 +671,7 @@
             if (laneIndex !== -1) activeKeys[laneIndex] = false;
         });
 
+        // Configura o desenho padrão na inicialização
         setNoteStyle('desenho');
         updateUI();
         update();
