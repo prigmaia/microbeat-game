@@ -50,7 +50,7 @@
         .input-group { display: flex; gap: 8px; align-items: center; }
         .input-group input[type="text"], .input-group input[type="number"] { background: #111; border: 1px solid #444; color: #fff; padding: 6px 10px; border-radius: 4px; flex: 1; font-size: 0.85rem; }
         .input-group input[type="number"] { flex: 0.4; text-align: center; color: var(--neon-orange); font-weight: bold; }
-        .btn-action { background: var(--neon-blue); color: #000; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
+        .btn-action { background: var(--neon-blue); color: #000; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase; width: 100%; font-size: 1rem;}
         .btn-action:hover { box-shadow: 0 0 15px var(--neon-blue); }
         #btn-open-config { position: absolute; bottom: 20px; left: 20px; background: rgba(0, 0, 0, 0.8); border: 2px solid var(--neon-blue); color: var(--neon-blue); padding: 10px 15px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; z-index: 90; display: none; box-shadow: 0 0 15px rgba(0, 210, 255, 0.3); transition: 0.2s; }
         #btn-open-config:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
@@ -58,7 +58,7 @@
         .diff-btn { background: #111; color: #aaa; border: 2px solid #333; padding: 6px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.2s; }
         .diff-btn.active { background: var(--neon-blue); color: #000; border-color: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); }
 
-        /* O NOVO LOBBY DE SELEÇÃO DE MÚSICA */
+        /* O LOBBY DE SELEÇÃO ONLINE */
         #lobby-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; background: rgba(5, 10, 15, 0.95); border: 2px solid var(--neon-blue); padding: 25px; border-radius: 10px; z-index: 200; display: none; flex-direction: column; gap: 15px; box-shadow: 0 0 40px rgba(0, 210, 255, 0.4); text-align: center; }
         .lobby-title { font-size: 1.5rem; color: #fff; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 0 10px #fff; }
         #lobby-status { font-size: 0.9rem; color: var(--neon-orange); margin-top: 10px; font-weight: bold; }
@@ -74,6 +74,7 @@
         .end-title { font-size: 3rem; color: var(--neon-blue); margin-bottom: 20px; text-transform: uppercase; text-shadow: 0 0 20px var(--neon-blue); }
         .stat-row { display: flex; justify-content: space-between; width: 300px; margin: 10px auto; font-size: 1.2rem; border-bottom: 1px solid #333; padding-bottom: 5px; }
         .stat-label { color: #aaa; } .stat-val { font-weight: bold; color: #fff; }
+        .val-perfect { color: var(--neon-blue); } .val-good { color: var(--neon-green); } .val-ok { color: #fff; } .val-miss { color: var(--neon-red); }
         .btn-restart { margin-top: 30px; background: transparent; color: var(--neon-blue); border: 2px solid var(--neon-blue); padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
         .btn-restart:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
         #sync-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.4); z-index: 500; display: none; pointer-events: none; }
@@ -100,10 +101,10 @@
         </div>
     </div>
 
-    <!-- O NOVO LOBBY DE SELEÇÃO -->
+    <!-- O LOBBY DE SELEÇÃO (SÓ APARECE ONLINE) -->
     <div id="lobby-panel">
         <div class="lobby-title">Sala de Batalha</div>
-        <div style="font-size: 0.85rem; color: #ccc; margin-bottom: 10px;">A batalha terá 2 Rounds. Cole o link do clipe que você escolheu para o seu round:</div>
+        <div style="font-size: 0.85rem; color: #ccc; margin-bottom: 10px;">A batalha terá 2 Rounds. Cole o link do YouTube que você escolheu para o seu round:</div>
         <div class="input-group">
             <span style="color:#aaa; font-size:0.8rem; font-weight:bold;">BPM:</span>
             <input type="number" id="lobbyBpmInput" value="120" min="40" max="300">
@@ -132,7 +133,7 @@
                 <button id="btn-online" class="style-btn" onclick="setOnlineMode(true)" style="color:var(--p2-color); border-color:var(--p2-color);">Online</button>
             </div>
             <div class="input-group">
-                <input type="text" class="input-text" id="wsUrlInput" placeholder="Cole o link do Render aqui..." value="https://microbeat-server.onrender.com/">
+                <input type="text" class="input-text" id="wsUrlInput" placeholder="URL do Servidor (ex: wss://microbeat...)" value="https://microbeat-server.onrender.com/">
             </div>
         </div>
 
@@ -151,14 +152,20 @@
             </div>
         </div>
 
-        <div class="config-section">
-            <h4>🎵 Jogar</h4>
-            <div style="font-size: 0.7rem; color: #ffaa00; margin-top: 5px;">*No modo Solo, selecione o MP3 abaixo. No modo Online, clique direto em Conectar.*</div>
-            <div class="input-group" style="margin-top: 8px;">
-                <button class="btn-action" style="width: 100%;" onclick="iniciarConexao()">CONECTAR / JOGAR</button>
+        <!-- SESSÃO DE ÁUDIO SOLO (ESCONDE QUANDO ONLINE) -->
+        <div class="config-section" id="solo-audio-config">
+            <h4>🎵 Áudio (Modo Solo)</h4>
+            <div class="input-group">
+                <span style="color:#aaa; font-size:0.8rem; font-weight:bold;">BPM:</span>
+                <input type="number" id="soloBpmInput" value="120" min="40" max="300" style="width: 50px;">
+                <input type="text" class="input-text" id="soloYtInput" placeholder="URL do YouTube...">
             </div>
-            <input type="file" id="audioUpload" accept="audio/mp3, audio/wav" style="color: #aaa; font-size: 0.8rem; margin-top: 5px;">
-            <audio id="bgm"></audio>
+            <div style="font-size: 0.7rem; color: #ffaa00; margin-top: 5px;">Ou escolha um MP3 (A música começa na hora):</div>
+            <input type="file" id="audioUpload" accept="audio/mp3, audio/wav" style="color: #aaa; font-size: 0.8rem; margin-top: 3px;">
+        </div>
+
+        <div class="config-section">
+            <button class="btn-action" onclick="iniciarConexao()">JOGAR / CONECTAR</button>
         </div>
     </div>
 
@@ -193,9 +200,9 @@
         
         // VARIÁVEIS DE LOBBY/PLAYLIST
         let myPlayerId = 1;
-        let playlist = [null, null]; // Guarda os dados da musica {id, bpm}
+        let playlist = [null, null]; 
         let myReady = false; let oppReady = false;
-        let currentRound = 0; // 0 = P1 song, 1 = P2 song
+        let currentRound = 0; 
         
         let bpm = 120; let baseBeatSec = 60 / bpm; 
         let speedFactor = 800; let hitWindow = 0.15; let beatMultiplier = 1; 
@@ -218,18 +225,20 @@
 
         function updateKeys() { for(let i = 0; i < 5; i++) { let val = document.getElementById('key'+i).value.toLowerCase(); keys[i] = val ? val : keys[i]; } }
         function setNoteStyle(style) { noteStyle = style; document.getElementById('btn-desenho').classList.remove('active'); document.getElementById('btn-tracinho').classList.remove('active'); document.getElementById('btn-' + style).classList.add('active'); }
-        function setOnlineMode(online) { isOnline = online; document.getElementById('btn-solo').classList.toggle('active', !online); document.getElementById('btn-online').classList.toggle('active', online); p2Panel.style.display = online ? 'flex' : 'none'; }
+        
+        function setOnlineMode(online) { 
+            isOnline = online; 
+            document.getElementById('btn-solo').classList.toggle('active', !online); 
+            document.getElementById('btn-online').classList.toggle('active', online); 
+            p2Panel.style.display = online ? 'flex' : 'none'; 
+            document.getElementById('solo-audio-config').style.display = online ? 'none' : 'block'; 
+        }
+        
         function fixWsUrl(url) { let fixed = url.trim(); if (!fixed) return ""; fixed = fixed.replace("https://", "wss://").replace("http://", "ws://"); if (!fixed.endsWith("/ws")) fixed = fixed.replace(/\/$/, "") + "/ws"; return fixed; }
 
-        // --- SISTEMA BLINDADO DE COMUNICAÇÃO DE REDE ---
         function enviarRede(dados) {
-            // Verifica com total segurança se o WebSocket está vivo e ABERTO (readyState 1) antes de enviar
             if (isOnline && socket && socket.readyState === 1) {
-                try {
-                    socket.send(JSON.stringify(dados));
-                } catch (e) {
-                    console.error("Erro interno ao enviar dado pela rede.", e);
-                }
+                try { socket.send(JSON.stringify(dados)); } catch (e) { console.error("Erro interno de rede", e); }
             }
         }
 
@@ -237,7 +246,7 @@
             updateKeys();
             if (isOnline) {
                 let wsUrl = fixWsUrl(document.getElementById('wsUrlInput').value);
-                if (!wsUrl || !wsUrl.startsWith("wss://")) return alert("Cole o link do servidor no campo.");
+                if (!wsUrl || !wsUrl.startsWith("wss://")) return alert("Cole o link do servidor no campo Multiplayer.");
                 document.getElementById('wsUrlInput').value = wsUrl; 
                 configPanel.style.display = 'none';
                 netStatus.style.display = 'block'; netStatus.innerText = "Conectando ao Servidor...";
@@ -255,11 +264,7 @@
                         document.getElementById('lobby-status').innerText = "Oponente encontrado! Escolha sua música.";
                     }
                     if (dados.acao === "WAIT") netStatus.innerText = "Aguardando oponente...";
-                    
-                    if (dados.acao === "DISCONNECT") { 
-                        alert("Oponente fugiu ou a internet dele caiu!"); 
-                        openConfigMenu(); 
-                    }
+                    if (dados.acao === "DISCONNECT") { alert("Oponente fugiu ou a internet dele caiu!"); openConfigMenu(); }
                     
                     if (dados.acao === "SONG_SELECT") {
                         let oppIdx = myPlayerId === 1 ? 1 : 0;
@@ -278,16 +283,29 @@
                 };
                 socket.onerror = function() { alert("Erro de Conexão. O Servidor está fora do ar."); openConfigMenu(); };
             } else {
-                startGameLocal();
+                // LÓGICA DO MODO SOLO YOUTUBE
+                let vidId = extractVideoId(document.getElementById('soloYtInput').value);
+                if (vidId) {
+                    bpm = parseInt(document.getElementById('soloBpmInput').value) || 120;
+                    baseBeatSec = 60 / bpm;
+                    audioMode = 'youtube';
+                    if (ytPlayer && ytPlayer.loadVideoById) {
+                        ytPlayer.loadVideoById(vidId);
+                        ytPlayer.playVideo();
+                    }
+                    startGameLocal();
+                } else {
+                    alert("No modo Solo, cole um link do YouTube e clique em Jogar, ou selecione um MP3 abaixo!");
+                }
             }
         }
 
-        // LÓGICA DO LOBBY
+        // LÓGICA DO LOBBY ONLINE
         function travarMusica() {
             let vidId = extractVideoId(document.getElementById('lobbyYtInput').value);
             let lbBpm = parseInt(document.getElementById('lobbyBpmInput').value);
             if (!vidId) return alert("Link do YouTube inválido.");
-            if (isNaN(lbBpm) || lbBpm <= 0) lbBpm = 120; // Prevenção de loop infinito por conta de BPM zero
+            if (isNaN(lbBpm) || lbBpm <= 0) lbBpm = 120; 
             
             document.getElementById('btn-lock-song').disabled = true;
             document.getElementById('btn-lock-song').innerText = "Aguardando oponente...";
@@ -333,13 +351,13 @@
         }
 
         function onYtPlayerStateChange(event) {
-            if (event.data === 0) { // Musica acabou
+            if (event.data === 0) { 
                 isPlaying = false;
                 if (isOnline && currentRound === 0) {
                     currentRound = 1;
-                    iniciarRound(currentRound); // Toca a segunda música
+                    iniciarRound(currentRound); // Emenda o Round 2
                 } else {
-                    triggerEndScreen(); // Fim do Jogo
+                    triggerEndScreen(); 
                 }
             }
         }
@@ -351,7 +369,7 @@
 
         function openConfigMenu() {
             isPlaying = false; 
-            notes = []; hitEffects = []; // Limpa notas para garantir que não gerem logs falsos se o jogo for interrompido
+            notes = []; hitEffects = []; 
             audio.pause(); if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo(); if (socket) socket.close();
             btnOpenConfig.style.display = 'none'; configPanel.style.display = 'flex'; netStatus.style.display = 'none';
             damageOverlay.style.display = 'none'; lobbyPanel.style.display = 'none';
@@ -360,10 +378,20 @@
             document.getElementById('btn-lock-song').innerText = "Estou Pronto!";
         }
 
+        // LÓGICA DO MP3 SOLO (Toca na hora que selecionar o arquivo)
         audioUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (file) { if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo(); audioMode = 'mp3'; audio.src = URL.createObjectURL(file); audio.play(); startGameLocal(); }
+            if (file) { 
+                if (ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo(); 
+                audioMode = 'mp3'; 
+                bpm = parseInt(document.getElementById('soloBpmInput').value) || 120;
+                baseBeatSec = 60 / bpm;
+                audio.src = URL.createObjectURL(file); 
+                audio.play(); 
+                startGameLocal(); 
+            }
         });
+
         audio.addEventListener('ended', triggerEndScreen);
 
         function triggerEndScreen() {
@@ -426,7 +454,6 @@
         function drawTracinho(ctx, x, y, color) { ctx.fillStyle = color; ctx.shadowBlur = 25; ctx.shadowColor = color; ctx.fillRect(x - 55, y - 12, 110, 24); ctx.fillStyle = '#fff'; ctx.shadowBlur = 0; ctx.fillRect(x - 40, y - 5, 80, 10); }
 
         function update() {
-            // MOTOR DE SEGURANÇA: Se qualquer erro de renderização acontecer (por lentidão do navegador), o código anula o erro silenciosamente e tenta de novo no próximo frame. Isso blinda o jogo do temido "erro da tela preta".
             try {
                 ctx.clearRect(0, 0, canvas.width, canvas.height); let currentTime = getAudioTime();
 
@@ -506,12 +533,7 @@
                     let effect = hitEffects[i]; ctx.fillStyle = '#fff'; ctx.font = 'bold 70px "Segoe UI"'; ctx.textAlign = 'center'; ctx.shadowBlur = 25; ctx.shadowColor = effect.color; ctx.lineWidth = 4; ctx.strokeStyle = '#000'; ctx.strokeText(effect.text, effect.x, effect.y); ctx.fillText(effect.text, effect.x, effect.y); ctx.shadowBlur = 0; effect.y -= 3; effect.life--; if (effect.life <= 0) { hitEffects.splice(i, 1); i--; }
                 }
                 ctx.textAlign = 'left';
-            } catch (err) {
-                // Console de segurança anula crashes e mantém o Canvas funcionando
-                console.error("Erro interno no motor mitigado.", err);
-            }
-            
-            // Independente de travar no código acima, ele re-renderiza o próximo frame
+            } catch (err) { }
             requestAnimationFrame(update);
         }
 
@@ -568,7 +590,7 @@
             }
         });
 
-        setNoteStyle('desenho'); setDifficulty('Médio'); requestAnimationFrame(update);
+        setOnlineMode(false); setNoteStyle('desenho'); setDifficulty('Médio'); requestAnimationFrame(update);
     </script>
 </body>
 </html>
