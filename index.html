@@ -5,29 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MicroBeat: Batalha Online</title>
     <style>
-        :root { --neon-blue: #00d2ff; --neon-green: #a8ff78; --neon-orange: #ff7e00; --neon-red: #ff0000; --p2-color: #ff0055; }
-        body { margin: 0; padding: 0; background-image: url('Gemini_Generated_Image_y1cw6gy1cw6gy1cw.png'); background-size: 100% 100%; background-position: center bottom; background-repeat: no-repeat; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; overflow: hidden; user-select: none; background-color: #050505; }
+        :root { 
+            --neon-blue: #00d2ff; 
+            --neon-green: #a8ff78; 
+            --neon-orange: #ff7e00; 
+            --neon-red: #ff0000; 
+            --p2-color: #ff0055; 
+        }
+        body { 
+            margin: 0; padding: 0; 
+            background-image: url('Gemini_Generated_Image_y1cw6gy1cw6gy1cw.png'); 
+            background-size: 100% 100%; 
+            background-position: center bottom; 
+            background-repeat: no-repeat; 
+            color: #fff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            height: 100vh; overflow: hidden; user-select: none; 
+            background-color: #050505; 
+        }
         
-        #signature { position: absolute; bottom: 15px; right: 25px; font-size: 1rem; color: rgba(255, 255, 255, 0.6); z-index: 1000; pointer-events: none; letter-spacing: 2px; text-transform: uppercase; }
+        #signature { 
+            position: absolute; bottom: 15px; right: 25px; 
+            font-size: 1rem; color: rgba(255, 255, 255, 0.6); 
+            z-index: 1000; pointer-events: none; 
+            letter-spacing: 2px; text-transform: uppercase; 
+        }
         #signature span { color: var(--neon-blue); font-weight: bold; text-shadow: 0 0 10px var(--neon-blue); }
 
         /* UIs do Jogo (P1 e P2) */
-        #top-left-mask { position: absolute; top: 70px; left: 30px; width: 250px; height: 140px; background: radial-gradient(circle, rgba(5,10,15,0.95) 40%, rgba(5,10,15,0) 100%); display: flex; flex-direction: column; justify-content: center; padding-left: 20px; }
+        #top-left-mask { 
+            position: absolute; top: 70px; left: 30px; width: 250px; height: 140px; 
+            background: radial-gradient(circle, rgba(5,10,15,0.95) 40%, rgba(5,10,15,0) 100%); 
+            display: flex; flex-direction: column; justify-content: center; padding-left: 20px; pointer-events: none;
+        }
         #score-value { font-size: 3.5rem; font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); line-height: 1.2; }
         #multiplier-value { font-size: 2.5rem; font-weight: bold; color: #88c0d0; text-shadow: 0 0 10px #88c0d0; }
-        #top-right-mask { position: absolute; top: 70px; right: 40px; width: 200px; height: 230px; background: radial-gradient(circle, rgba(5,10,15,0.95) 40%, rgba(5,10,15,0) 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        #top-right-mask { 
+            position: absolute; top: 70px; right: 40px; width: 200px; height: 230px; 
+            background: radial-gradient(circle, rgba(5,10,15,0.95) 40%, rgba(5,10,15,0) 100%); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;
+        }
         .combo-title { color: var(--neon-green); font-weight: bold; font-size: 1.2rem; text-shadow: 0 0 10px var(--neon-green); text-align: center; margin-bottom: 15px; text-transform: uppercase;}
-        .combo-circle { width: 120px; height: 120px; border-radius: 50%; border: 5px solid var(--neon-orange); background: #0a0a0a; box-shadow: 0 0 20px var(--neon-orange), inset 0 0 15px var(--neon-orange); display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .combo-circle { 
+            width: 120px; height: 120px; border-radius: 50%; border: 5px solid var(--neon-orange); 
+            background: #0a0a0a; box-shadow: 0 0 20px var(--neon-orange), inset 0 0 15px var(--neon-orange); 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+        }
         #combo-value { font-size: 2.5rem; font-weight: bold; color: #fff; text-shadow: 0 0 10px #ffcc00; }
         
-        #special-panel { position: absolute; bottom: 30px; right: 40px; width: 280px; background: rgba(15, 5, 5, 0.9); border: 2px solid #550000; border-radius: 12px; padding: 18px; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); z-index: 50; }
+        #special-panel { 
+            position: absolute; bottom: 30px; right: 40px; width: 280px; 
+            background: rgba(15, 5, 5, 0.9); border: 2px solid #550000; border-radius: 12px; 
+            padding: 18px; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); z-index: 50; pointer-events: none;
+        }
         .special-title { font-size: 1.1rem; color: #ff5555; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px; text-shadow: 0 0 10px #ff0000; }
         #special-container { width: 100%; height: 30px; background: #111; border: 2px solid #333; border-radius: 6px; position: relative; box-shadow: inset 0 0 15px #000; overflow: hidden; }
         #special-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #880000, #ff0000, #ffaa00); box-shadow: 0 0 15px #ff0000; transition: width 0.1s; }
         .special-ready { border-color: #ff0000 !important; box-shadow: 0 0 30px #ff0000 !important; animation: pulse-red 0.5s infinite alternate; }
+        
         @keyframes pulse-red { 0% { box-shadow: 0 0 10px #ff0000; } 100% { box-shadow: 0 0 40px #ff0000, 0 0 20px #ffaa00; } }
         
-        #p2-online-panel { position: absolute; top: 320px; right: 40px; width: 200px; background: radial-gradient(circle, rgba(15,5,5,0.95) 40%, rgba(15,5,5,0) 100%); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0; border-top: 2px solid var(--p2-color); border-bottom: 2px solid var(--p2-color); }
+        #p2-online-panel { 
+            position: absolute; top: 320px; right: 40px; width: 200px; 
+            background: radial-gradient(circle, rgba(15,5,5,0.95) 40%, rgba(15,5,5,0) 100%); 
+            display: none; flex-direction: column; align-items: center; justify-content: center; 
+            padding: 20px 0; border-top: 2px solid var(--p2-color); border-bottom: 2px solid var(--p2-color); 
+            pointer-events: none;
+        }
         .p2-title { color: #fff; font-weight: bold; font-size: 1rem; letter-spacing: 2px; margin-bottom: 5px; }
         #p2-score-val { font-size: 2rem; font-weight: bold; color: var(--p2-color); text-shadow: 0 0 10px var(--p2-color); margin-bottom: 10px;}
         
@@ -36,12 +81,20 @@
         #damage-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 0, 0, 0.4); z-index: 800; display: none; pointer-events: none; animation: shake 0.3s infinite; }
         @keyframes shake { 0% { transform: translate(2px, 2px) rotate(0deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
         
-        #round-alert { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 5rem; color: #fff; font-weight: bold; text-shadow: 0 0 30px var(--neon-blue); z-index: 9999; display: none; text-transform: uppercase; }
+        #round-alert { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 5rem; color: #fff; font-weight: bold; text-shadow: 0 0 30px var(--neon-blue); z-index: 9999; display: none; text-transform: uppercase; pointer-events: none; }
         #round-transition-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         .trans-title { font-size: 4rem; color: var(--neon-orange); text-transform: uppercase; text-shadow: 0 0 20px var(--neon-orange); margin-bottom: 20px; }
 
-        /* MENUS DE CONFIGURAÇÃO E LOBBY (Z-INDEX NO MÁXIMO) */
-        #config-panel { position: absolute; bottom: 20px; left: 20px; width: 360px; background: rgba(5, 10, 15, 0.95); border: 1px solid var(--neon-blue); padding: 15px 20px; border-radius: 8px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 0 25px rgba(0, 210, 255, 0.3); max-height: 85vh; overflow-y: auto; }
+        /* MENUS E BOTÕES (Z-INDEX 9999 E CLICÁVEIS) */
+        #btn-toggle-style { 
+            position: absolute; top: 20px; left: 20px; z-index: 9999; 
+            background: rgba(0,0,0,0.8); border: 2px solid var(--neon-blue); 
+            color: var(--neon-blue); padding: 10px 15px; border-radius: 8px; 
+            font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s;
+        }
+        #btn-toggle-style:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
+
+        #config-panel { position: absolute; bottom: 20px; left: 20px; width: 360px; background: rgba(5, 10, 15, 0.95); border: 1px solid var(--neon-blue); padding: 15px 20px; border-radius: 8px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 0 25px rgba(0, 210, 255, 0.3); max-height: 85vh; overflow-y: auto; pointer-events: auto; }
         .config-section h4 { margin: 0 0 8px 0; font-size: 0.85rem; color: var(--neon-blue); text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px; }
         .style-toggle { display: flex; gap: 10px; }
         .style-btn { flex: 1; background: #111; color: #aaa; border: 1px solid #333; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; transition: 0.2s; }
@@ -56,7 +109,7 @@
         #btn-open-config { position: absolute; bottom: 20px; left: 20px; background: rgba(0, 0, 0, 0.8); border: 2px solid var(--neon-blue); color: var(--neon-blue); padding: 10px 15px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; z-index: 9999; display: none; transition: 0.2s; }
         #btn-open-config:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
         
-        #difficulty-panel { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 9999; background: rgba(0, 0, 0, 0.85); padding: 8px 15px; border-radius: 10px; border: 1px solid var(--neon-blue); }
+        #difficulty-panel { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 9999; background: rgba(0, 0, 0, 0.85); padding: 8px 15px; border-radius: 10px; border: 1px solid var(--neon-blue); pointer-events: auto; }
         .diff-btn { background: #111; color: #aaa; border: 2px solid #333; padding: 6px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.2s; }
         .diff-btn.active { background: var(--neon-blue); color: #000; border-color: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue); }
 
@@ -64,11 +117,11 @@
         .lobby-title { font-size: 1.5rem; color: #fff; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
 
         /* PISTA E RENDERIZAÇÃO */
-        #highway-container { position: absolute; bottom: 210px; left: 50%; transform: translateX(-50%) perspective(250px); width: 750px; height: 55vh; display: flex; justify-content: center; align-items: flex-end; pointer-events: none; }
+        #highway-container { position: absolute; bottom: 210px; left: 50%; transform: translateX(-50%) perspective(300px); width: 750px; height: 55vh; display: flex; justify-content: center; align-items: flex-end; pointer-events: none; }
         canvas { transform: rotateX(60deg); transform-origin: bottom center; background: rgba(5, 7, 10, 0.95); border-left: 10px solid var(--neon-blue); border-right: 10px solid var(--neon-blue); box-shadow: 0 -40px 80px rgba(0, 0, 0, 1) inset; }
         
-        /* YouTube invisível mas presente na tela para não ser bloqueado */
-        #yt-player-container { position: absolute; top: 0px; left: 0px; width: 300px; height: 200px; opacity: 0.01; pointer-events: none; z-index: -100; }
+        /* O SEGREDO DO YOUTUBE: Nunca o esconda 100%, ou o Chrome pausa o timer! */
+        #yt-player-container { position: absolute; top: 10px; left: 10px; width: 200px; height: 200px; opacity: 0.001; pointer-events: none; z-index: 9999; }
         
         /* TELA FINAL */
         #end-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; }
@@ -84,9 +137,12 @@
 
     <div id="signature">by: <span>Priscila Maia</span></div>
     
-    <!-- Player do YouTube (Visível para o navegador, invisível para você) -->
+    <!-- Player do YouTube (Enganando o navegador para não ser congelado) -->
     <div id="yt-player-container"><div id="yt-player"></div></div>
     
+    <!-- Botão de Alternância de Estilo Global -->
+    <button id="btn-toggle-style" onclick="toggleGlobalNoteStyle()">Design: Desenhos</button>
+
     <div id="network-status">Aguardando Oponente...</div>
     <div id="damage-overlay"></div> 
     <div id="sync-flash"></div> 
@@ -112,10 +168,10 @@
 
     <div id="lobby-panel">
         <div class="lobby-title">Sala de Batalha (Lobby)</div>
-        <div style="font-size: 0.85rem; color: #ccc; margin-bottom: 15px;">A batalha terá 2 Rounds. Cole o link do YouTube da música que você escolheu.</div>
+        <div style="font-size: 0.85rem; color: #ccc; margin-bottom: 15px;">A batalha terá 2 Rounds. Cole o link do YouTube da sua música.</div>
         <div class="input-group">
             <span style="color:#aaa; font-size:0.8rem; font-weight:bold;">BPM:</span>
-            <input type="number" id="lobbyBpmInput" value="120" min="40" max="300">
+            <input type="number" id="lobbyBpmInput" value="120" min="40" max="300" style="width:60px; text-align:center;">
         </div>
         <div class="input-group">
             <input type="text" class="input-text" id="lobbyYtInput" placeholder="URL do YouTube...">
@@ -135,26 +191,18 @@
 
     <div id="config-panel">
         <div class="config-section">
-            <h4>🌐 Modo Multiplayer</h4>
+            <h4>🌐 Modo de Jogo</h4>
             <div class="style-toggle" style="margin-bottom: 8px;">
                 <button id="btn-solo" class="style-btn active" onclick="setOnlineMode(false)">Modo Solo</button>
-                <button id="btn-online" class="style-btn" onclick="setOnlineMode(true)" style="color:var(--p2-color); border-color:var(--p2-color);">Online</button>
+                <button id="btn-online" class="style-btn" onclick="setOnlineMode(true)" style="color:var(--p2-color); border-color:var(--p2-color);">Online Multiplayer</button>
             </div>
-            <div class="input-group">
+            <div class="input-group" id="ws-container" style="display:none;">
                 <input type="text" class="input-text" id="wsUrlInput" placeholder="URL Servidor (wss://...)" value="https://microbeat-server.onrender.com/">
             </div>
         </div>
 
         <div class="config-section">
-            <h4>🎮 Estilos Visuais</h4>
-            <div class="style-toggle">
-                <button id="btn-desenho" class="style-btn active" onclick="setNoteStyle('desenho')">Desenhos</button>
-                <button id="btn-tracinho" class="style-btn" onclick="setNoteStyle('tracinho')">Tracinhos</button>
-            </div>
-        </div>
-
-        <div class="config-section">
-            <h4>⌨️ Teclas de Fricção (Pistas)</h4>
+            <h4>⌨️ Teclas das Pistas</h4>
             <div style="font-size: 0.7rem; color: #ccc; margin-bottom: 5px;">As pistas ativas mudam conforme a dificuldade.</div>
             <div class="key-config">
                 <input type="text" class="key-input" id="key0" value="A" maxlength="1">
@@ -166,11 +214,11 @@
         </div>
 
         <div class="config-section" id="expert-controls" style="border: 1px solid var(--neon-orange); padding: 8px; border-radius: 5px; background: rgba(255,100,0,0.1);">
-            <h4 style="color: var(--neon-orange);">🎸 Palhetada (Modo Expert)</h4>
-            <div style="font-size: 0.7rem; color: #ccc; margin-bottom: 5px;">No expert, segure a tecla e aperte a palheta!</div>
+            <h4 style="color: var(--neon-orange);">🎸 Palhetada (Obrigatório no Expert)</h4>
+            <div style="font-size: 0.7rem; color: #ccc; margin-bottom: 5px;">Segure a tecla da pista e aperte a palheta no ritmo!</div>
             <div class="input-group">
-                <input type="text" class="input-text" id="strum1" value="ArrowUp" title="Ex: ArrowUp" style="text-align: center;">
-                <input type="text" class="input-text" id="strum2" value="ArrowDown" title="Ex: ArrowDown" style="text-align: center;">
+                <input type="text" class="input-text" id="strum1" value="ArrowUp" title="Cima" style="text-align: center;">
+                <input type="text" class="input-text" id="strum2" value="ArrowDown" title="Baixo" style="text-align: center;">
             </div>
         </div>
 
@@ -181,7 +229,7 @@
                 <input type="number" id="soloBpmInput" value="120" min="40" max="300" style="width: 50px;">
                 <input type="text" class="input-text" id="soloYtInput" placeholder="URL do YouTube...">
             </div>
-            <div style="font-size: 0.7rem; color: #ffaa00; margin-top: 5px;">Ou escolha um MP3 (Começa na hora do clique):</div>
+            <div style="font-size: 0.7rem; color: #ffaa00; margin-top: 5px;">Ou escolha um MP3 local:</div>
             <input type="file" id="audioUpload" accept="audio/mp3, audio/wav" style="color: #aaa; font-size: 0.8rem; margin-top: 3px;">
         </div>
 
@@ -193,13 +241,16 @@
     <!-- UI JOGADOR PRINCIPAL -->
     <div id="top-left-mask"><div id="score-value">0</div><div id="multiplier-value">X1</div></div>
     <div id="top-right-mask"><div class="combo-title">MEU COMBO</div><div class="combo-circle"><div id="combo-value">0</div></div></div>
-    <div id="special-panel"><div class="special-title">SANGUE DE MORDOR</div><div id="special-container"><div id="special-bar"></div></div><div id="special-hint">ATAQUE (ESPAÇO)</div></div>
+    <div id="special-panel"><div class="special-title">SANGUE DE MORDOR</div><div id="special-container"><div id="special-bar"></div></div><div id="special-hint" style="opacity:0; font-size:0.8rem; color:#fff; margin-top:5px; font-weight:bold; transition:0.3s;">ATAQUE (ESPAÇO)</div></div>
 
     <!-- UI OPONENTE ONLINE -->
     <div id="p2-online-panel"><div class="p2-title">OPONENTE</div><div id="p2-score-val">0</div><div style="font-size:0.8rem; color:#aaa;">COMBO</div><div id="p2-combo-val">0</div></div>
 
     <!-- A PISTA -->
     <div id="highway-container"><canvas id="gameCanvas" width="900" height="1200"></canvas></div>
+    
+    <!-- Elemento de Audio Nativo para MP3 -->
+    <audio id="bgm"></audio>
 
     <script src="https://www.youtube.com/iframe_api"></script>
 
@@ -243,6 +294,9 @@
         let holdProb = 0.15; let chordProb = 0.15; let maxChordNotes = 2; 
         let isExpertMode = false;
         
+        // CORREÇÃO CRÍTICA: lookAheadTime dinâmico garante que a nota apareça instantaneamente
+        let lookAheadTime = (hitZoneY / speedFactor) + 0.1; 
+        
         // CONFIGURAÇÃO DAS PISTAS
         const fullLaneConfig = [
             { color: '#ff7e00', type: 'bacilo' }, { color: '#00ffcc', type: 'virus' }, 
@@ -252,7 +306,7 @@
         
         let tapTimes = []; let laneOccupiedUntil = [0, 0, 0, 0, 0]; 
         let notes = []; let fretOffset = 0; let hitEffects = []; 
-        let nextBeatTime = 0; let lookAheadTime = 2.5; let firstBeatInitialized = false;
+        let nextBeatTime = 0; let firstBeatInitialized = false;
 
         let ytPlayer; let isYtApiReady = false;
         function onYouTubeIframeAPIReady() { 
@@ -262,23 +316,49 @@
                 events: { 'onReady': () => { isYtApiReady = true; }, 'onStateChange': onYtPlayerStateChange }
             }); 
         }
-        function extractVideoId(url) { const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/); return (match && match[2].length === 11) ? match[2] : (url.length===11?url:null); }
-        function getAudioTime() { if (!isPlaying) return 0; if (audioMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') return ytPlayer.getCurrentTime(); if (audioMode === 'mp3') return audio.currentTime; return 0; }
+        
+        function extractVideoId(url) { 
+            const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/); 
+            return (match && match[2].length === 11) ? match[2] : (url.length === 11 ? url : null); 
+        }
+        
+        function getAudioTime() { 
+            if (!isPlaying) return 0; 
+            if (audioMode === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+                let t = ytPlayer.getCurrentTime();
+                return (t > 0) ? t : 0; 
+            }
+            if (audioMode === 'mp3') return audio.currentTime; 
+            return 0; 
+        }
 
         function updateInputs() { 
             for(let i = 0; i < 5; i++) { let val = document.getElementById('key'+i).value.toLowerCase(); keysConfig[i] = val ? val : keysConfig[i]; } 
             strumKeys[0] = document.getElementById('strum1').value.toLowerCase();
             strumKeys[1] = document.getElementById('strum2').value.toLowerCase();
         }
-        function setNoteStyle(style) { noteStyle = style; document.getElementById('btn-desenho').classList.remove('active'); document.getElementById('btn-tracinho').classList.remove('active'); document.getElementById('btn-' + style).classList.add('active'); }
+        
+        function toggleGlobalNoteStyle() {
+            noteStyle = noteStyle === 'desenho' ? 'tracinho' : 'desenho';
+            document.getElementById('btn-toggle-style').innerText = 'Design: ' + (noteStyle === 'desenho' ? 'Desenhos' : 'Tracinhos');
+        }
+
         function setOnlineMode(online) { 
             isOnline = online; 
-            document.getElementById('btn-solo').classList.toggle('active', !online); document.getElementById('btn-online').classList.toggle('active', online); 
-            p2Panel.style.display = online ? 'flex' : 'none'; document.getElementById('solo-audio-config').style.display = online ? 'none' : 'block'; 
+            document.getElementById('btn-solo').classList.toggle('active', !online); 
+            document.getElementById('btn-online').classList.toggle('active', online); 
+            p2Panel.style.display = online ? 'flex' : 'none'; 
+            document.getElementById('solo-audio-config').style.display = online ? 'none' : 'block'; 
+            document.getElementById('ws-container').style.display = online ? 'flex' : 'none';
         }
-        function fixWsUrl(url) { let fixed = url.trim(); if (!fixed) return ""; fixed = fixed.replace("https://", "wss://").replace("http://", "ws://"); if (!fixed.endsWith("/ws")) fixed = fixed.replace(/\/$/, "") + "/ws"; return fixed; }
 
-        // A CORREÇÃO PRINCIPAL DE DIFICULDADE
+        function fixWsUrl(url) { 
+            let fixed = url.trim(); if (!fixed) return ""; 
+            fixed = fixed.replace("https://", "wss://").replace("http://", "ws://"); 
+            if (!fixed.endsWith("/ws")) fixed = fixed.replace(/\/$/, "") + "/ws"; 
+            return fixed; 
+        }
+
         function setDifficulty(level) {
             document.querySelectorAll('.diff-btn').forEach(btn => { 
                 btn.classList.remove('active'); 
@@ -286,15 +366,26 @@
             });
             isExpertMode = false;
             
-            // Note que Fácil e Médio agora possuem acordes ativos (chordProb)!
-            if (level === 'Fácil') { numLanes = 3; speedFactor = 600; hitWindow = 0.20; beatMultiplier = 2; holdProb = 0; chordProb = 0.10; maxChordNotes = 2; } 
-            else if (level === 'Médio') { numLanes = 4; speedFactor = 800; hitWindow = 0.15; beatMultiplier = 1; holdProb = 0.10; chordProb = 0.20; maxChordNotes = 2; } 
-            else if (level === 'Difícil') { numLanes = 5; speedFactor = 1200; hitWindow = 0.10; beatMultiplier = 0.5; holdProb = 0.20; chordProb = 0.35; maxChordNotes = 3; } 
-            else if (level === 'Expert') { numLanes = 5; speedFactor = 1800; hitWindow = 0.06; beatMultiplier = 0.25; holdProb = 0.35; chordProb = 0.50; maxChordNotes = 4; isExpertMode = true; }
+            if (level === 'Fácil') { 
+                numLanes = 3; speedFactor = 600; hitWindow = 0.20; beatMultiplier = 2; holdProb = 0.05; chordProb = 0.05; maxChordNotes = 2; 
+            } else if (level === 'Médio') { 
+                numLanes = 4; speedFactor = 800; hitWindow = 0.15; beatMultiplier = 1; holdProb = 0.15; chordProb = 0.25; maxChordNotes = 2; 
+            } else if (level === 'Difícil') { 
+                numLanes = 5; speedFactor = 1200; hitWindow = 0.10; beatMultiplier = 0.5; holdProb = 0.25; chordProb = 0.40; maxChordNotes = 3; 
+            } else if (level === 'Expert') { 
+                numLanes = 5; speedFactor = 1800; hitWindow = 0.06; beatMultiplier = 0.25; holdProb = 0.35; chordProb = 0.60; maxChordNotes = 4; isExpertMode = true; 
+            }
             laneWidth = canvas.width / numLanes;
+            
+            // Recalcula para que a nota não fique presa fora da tela e apareça instantaneamente
+            lookAheadTime = (hitZoneY / speedFactor) + 0.1;
         }
 
-        function enviarRede(dados) { if (isOnline && socket && socket.readyState === 1) { try { socket.send(JSON.stringify(dados)); } catch (e) { console.error(e); } } }
+        function enviarRede(dados) { 
+            if (isOnline && socket && socket.readyState === 1) { 
+                try { socket.send(JSON.stringify(dados)); } catch (e) { console.error(e); } 
+            } 
+        }
 
         function iniciarJogoOuConexao() {
             updateInputs();
@@ -302,19 +393,39 @@
                 let wsUrl = fixWsUrl(document.getElementById('wsUrlInput').value);
                 if (!wsUrl) return alert("Cole o link do servidor no campo Multiplayer.");
                 document.getElementById('wsUrlInput').value = wsUrl; 
-                configPanel.style.display = 'none'; netStatus.style.display = 'block'; netStatus.innerText = "Conectando ao Servidor...";
-                if (socket) socket.close(); socket = new WebSocket(wsUrl);
+                configPanel.style.display = 'none'; 
+                netStatus.style.display = 'block'; 
+                netStatus.innerText = "Conectando ao Servidor...";
+                
+                if (socket) socket.close(); 
+                socket = new WebSocket(wsUrl);
                 
                 socket.onopen = function() { netStatus.innerText = "Aguardando Oponente na Sala..."; };
                 socket.onmessage = function(event) {
                     const dados = JSON.parse(event.data);
-                    if (dados.acao === "LOBBY") { myPlayerId = dados.player_id; netStatus.style.display = 'none'; lobbyPanel.style.display = 'flex'; document.getElementById('lobby-status').innerText = "Oponente encontrado! Escolha sua música."; }
+                    if (dados.acao === "LOBBY") { 
+                        myPlayerId = dados.player_id; netStatus.style.display = 'none'; lobbyPanel.style.display = 'flex'; 
+                        document.getElementById('lobby-status').innerText = "Oponente encontrado! Escolha sua música."; 
+                    }
                     if (dados.acao === "WAIT") netStatus.innerText = "Aguardando oponente...";
                     if (dados.acao === "DISCONNECT") { alert("Oponente desconectado ou servidor caiu!"); openConfigMenu(); }
-                    if (dados.acao === "SONG_SELECT") { let oppIdx = myPlayerId === 1 ? 1 : 0; playlist[oppIdx] = { id: dados.ytId, bpm: dados.bpm }; oppReady = true; checarInicioPlaylist(); }
-                    if (dados.acao === "HIT") { p2Score = dados.score; p2Combo = dados.combo; document.getElementById('p2-score-val').innerText = p2Score.toLocaleString(); document.getElementById('p2-combo-val').innerText = p2Combo; }
-                    if (dados.acao === "MISS") { p2Combo = 0; document.getElementById('p2-combo-val').innerText = p2Combo; }
-                    if (dados.acao === "SPECIAL") { damageOverlay.style.display = 'block'; setTimeout(() => { damageOverlay.style.display = 'none'; }, 3000); }
+                    if (dados.acao === "SONG_SELECT") { 
+                        let oppIdx = myPlayerId === 1 ? 1 : 0; 
+                        playlist[oppIdx] = { id: dados.ytId, bpm: dados.bpm }; 
+                        oppReady = true; 
+                        checarInicioPlaylist(); 
+                    }
+                    if (dados.acao === "HIT") { 
+                        p2Score = dados.score; p2Combo = dados.combo; 
+                        document.getElementById('p2-score-val').innerText = p2Score.toLocaleString(); 
+                        document.getElementById('p2-combo-val').innerText = p2Combo; 
+                    }
+                    if (dados.acao === "MISS") { 
+                        p2Combo = 0; document.getElementById('p2-combo-val').innerText = p2Combo; 
+                    }
+                    if (dados.acao === "SPECIAL") { 
+                        damageOverlay.style.display = 'block'; setTimeout(() => { damageOverlay.style.display = 'none'; }, 3000); 
+                    }
                 };
                 socket.onerror = function() { alert("Erro de Conexão. Verifique o servidor."); openConfigMenu(); };
             } else {
@@ -330,24 +441,24 @@
                         ytPlayer.playVideo(); 
                         startGameMotor();
                     } else {
-                        alert("O YouTube ainda está carregando a API. Clique de novo em 1 segundo!");
+                        alert("O YouTube ainda está carregando a API. Aguarde um segundo e tente novamente.");
                     }
                 } else if (fileInput.files.length > 0) {
                     bpm = parseInt(document.getElementById('soloBpmInput').value) || 120; 
                     baseBeatSec = 60 / bpm; 
                     audioMode = 'mp3'; 
                     
-                    if (!audio.src || audio.src === window.location.href) {
+                    if (!audio.src || !audio.src.startsWith('blob:')) {
                         audio.src = URL.createObjectURL(fileInput.files[0]);
                     }
                     
                     audio.play().then(() => {
                         startGameMotor();
                     }).catch(e => {
-                        alert("O navegador bloqueou o áudio. Clique na tela e tente de novo!");
+                        alert("O navegador bloqueou o áudio. Tente interagir com a tela e clique de novo!");
                     });
                 } else {
-                    alert("Modo Solo: Cole um link do YouTube ou selecione um MP3 na caixinha!");
+                    alert("Modo Solo: Insira um link do YouTube ou selecione um MP3 local!");
                 }
             }
         }
@@ -358,6 +469,7 @@
                 if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
                 audioMode = 'mp3';
                 audio.src = URL.createObjectURL(file);
+                document.getElementById('soloYtInput').value = ''; 
             }
         });
 
@@ -366,21 +478,45 @@
             let lbBpm = parseInt(document.getElementById('lobbyBpmInput').value);
             if (!vidId) return alert("Link do YouTube inválido.");
             if (isNaN(lbBpm) || lbBpm <= 0) lbBpm = 120; 
-            document.getElementById('btn-lock-song').disabled = true; document.getElementById('btn-lock-song').innerText = "Aguardando oponente...";
-            let myIdx = myPlayerId === 1 ? 0 : 1; playlist[myIdx] = { id: vidId, bpm: lbBpm }; myReady = true;
-            enviarRede({acao: 'SONG_SELECT', ytId: vidId, bpm: lbBpm}); checarInicioPlaylist();
+            
+            document.getElementById('btn-lock-song').disabled = true; 
+            document.getElementById('btn-lock-song').innerText = "Aguardando oponente...";
+            
+            let myIdx = myPlayerId === 1 ? 0 : 1; 
+            playlist[myIdx] = { id: vidId, bpm: lbBpm }; 
+            myReady = true;
+            enviarRede({acao: 'SONG_SELECT', ytId: vidId, bpm: lbBpm}); 
+            checarInicioPlaylist();
         }
 
         function checarInicioPlaylist() {
-            if (myReady && oppReady && playlist[0] && playlist[1]) { lobbyPanel.style.display = 'none'; currentRound = 0; iniciarRound(currentRound); } 
-            else if (myReady && !oppReady) { document.getElementById('lobby-status').innerText = "Sua música está pronta. Esperando oponente..."; }
+            if (myReady && oppReady && playlist[0] && playlist[1]) { 
+                lobbyPanel.style.display = 'none'; 
+                currentRound = 0; 
+                iniciarRound(currentRound); 
+            } else if (myReady && !oppReady) { 
+                document.getElementById('lobby-status').innerText = "Sua música está pronta. Esperando oponente..."; 
+            }
         }
 
         function iniciarRound(roundNum) {
-            audioMode = 'youtube'; bpm = parseInt(playlist[roundNum].bpm) || 120; baseBeatSec = 60 / bpm;
-            resetGameStateParcial(); transitionScreen.style.display = 'none';
-            roundAlert.innerText = `ROUND ${roundNum + 1}`; roundAlert.style.display = 'block';
-            setTimeout(() => { roundAlert.style.display = 'none'; if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') { ytPlayer.loadVideoById(playlist[roundNum].id); ytPlayer.playVideo(); } startGameMotor(); }, 3000);
+            audioMode = 'youtube'; 
+            bpm = parseInt(playlist[roundNum].bpm) || 120; 
+            baseBeatSec = 60 / bpm;
+            
+            resetGameStateParcial(); 
+            transitionScreen.style.display = 'none';
+            roundAlert.innerText = `ROUND ${roundNum + 1}`; 
+            roundAlert.style.display = 'block';
+            
+            setTimeout(() => { 
+                roundAlert.style.display = 'none'; 
+                if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') { 
+                    ytPlayer.loadVideoById(playlist[roundNum].id); 
+                    ytPlayer.playVideo(); 
+                } 
+                startGameMotor(); 
+            }, 3000);
         }
 
         function onYtPlayerStateChange(event) {
@@ -391,48 +527,86 @@
                     transitionScreen.style.display = 'flex';
                     document.getElementById('trans-my-score').innerText = score.toLocaleString();
                     document.getElementById('trans-op-score').innerText = p2Score.toLocaleString();
-                    setTimeout(() => { iniciarRound(currentRound); }, 5000);
-                } else { triggerEndScreen(); }
+                    setTimeout(() => { iniciarRound(currentRound); }, 6000);
+                } else { 
+                    triggerEndScreen(); 
+                }
             }
         }
 
         function startGameMotor() {
-            configPanel.style.display = 'none'; lobbyPanel.style.display = 'none'; transitionScreen.style.display = 'none'; btnOpenConfig.style.display = 'block';
+            configPanel.style.display = 'none'; lobbyPanel.style.display = 'none'; 
+            transitionScreen.style.display = 'none'; btnOpenConfig.style.display = 'block';
             resetGameStateParcial(); isPlaying = true; firstBeatInitialized = false; 
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
             updateMotor();
         }
 
         function openConfigMenu() {
-            isPlaying = false; notes = []; hitEffects = []; audio.pause(); if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo(); if (socket) socket.close();
-            btnOpenConfig.style.display = 'none'; configPanel.style.display = 'flex'; netStatus.style.display = 'none'; damageOverlay.style.display = 'none'; lobbyPanel.style.display = 'none'; transitionScreen.style.display = 'none'; document.getElementById('end-screen').style.display = 'none';
-            myReady = false; oppReady = false; playlist = [null, null]; document.getElementById('btn-lock-song').disabled = false; document.getElementById('btn-lock-song').innerText = "Confirmar Música!";
+            isPlaying = false; notes = []; hitEffects = []; audio.pause(); 
+            if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') ytPlayer.pauseVideo(); 
+            if (socket) socket.close();
+            
+            btnOpenConfig.style.display = 'none'; 
+            configPanel.style.display = 'flex'; 
+            netStatus.style.display = 'none'; 
+            damageOverlay.style.display = 'none'; 
+            lobbyPanel.style.display = 'none'; 
+            transitionScreen.style.display = 'none'; 
+            document.getElementById('end-screen').style.display = 'none';
+            
+            myReady = false; oppReady = false; playlist = [null, null]; 
+            document.getElementById('btn-lock-song').disabled = false; 
+            document.getElementById('btn-lock-song').innerText = "Confirmar Música!";
         }
 
-        audio.addEventListener('ended', triggerEndScreen);
+        audio.addEventListener('ended', () => { if(isPlaying) triggerEndScreen(); });
 
         function triggerEndScreen() {
-            isPlaying = false; document.getElementById('final-score').innerText = score.toLocaleString('en-US'); document.getElementById('final-p2-score').innerText = isOnline ? p2Score.toLocaleString('en-US') : "0";
-            let winnerTxt = "..."; if (isOnline) { if (score > p2Score) winnerTxt = "Você Venceu!"; else if (p2Score > score) winnerTxt = "Oponente Venceu!"; else winnerTxt = "Empate!"; } else winnerTxt = "Análise Concluída";
-            document.getElementById('final-winner').innerText = winnerTxt; document.getElementById('end-screen').style.display = 'flex';
+            isPlaying = false; 
+            document.getElementById('final-score').innerText = score.toLocaleString('en-US'); 
+            document.getElementById('final-p2-score').innerText = isOnline ? p2Score.toLocaleString('en-US') : "0";
+            
+            let winnerTxt = "..."; 
+            if (isOnline) { 
+                if (score > p2Score) winnerTxt = "Você Venceu!"; 
+                else if (p2Score > score) winnerTxt = "Oponente Venceu!"; 
+                else winnerTxt = "Empate!"; 
+            } else {
+                winnerTxt = "Análise Concluída";
+            }
+            document.getElementById('final-winner').innerText = winnerTxt; 
+            document.getElementById('end-screen').style.display = 'flex';
         }
 
         function closeEndScreen() { openConfigMenu(); }
 
         function resetGameStateParcial() {
             notes = []; laneOccupiedUntil = [0, 0, 0, 0, 0]; tapTimes = []; hitEffects = []; activeKeys = [false,false,false,false,false];
-            if (!isOnline || currentRound === 0) { score = 0; maxCombo = 0; p2Score = 0; stats = { perfect: 0, good: 0, ok: 0, miss: 0 }; }
+            if (!isOnline || currentRound === 0) { 
+                score = 0; maxCombo = 0; p2Score = 0; stats = { perfect: 0, good: 0, ok: 0, miss: 0 }; 
+            }
             combo = 0; baseMultiplier = 1; propulsion = 0; isPropulsionActive = false; p2Combo = 0;
-            document.getElementById('p2-score-val').innerText = p2Score.toLocaleString(); document.getElementById('p2-combo-val').innerText = '0';
+            document.getElementById('p2-score-val').innerText = p2Score.toLocaleString(); 
+            document.getElementById('p2-combo-val').innerText = '0';
             updateUI();
         }
 
         function updateUI() {
-            scoreUI.innerText = score.toLocaleString('en-US'); comboUI.innerText = combo;
+            scoreUI.innerText = score.toLocaleString('en-US'); 
+            comboUI.innerText = combo;
+            
             let currentMultiplier = isPropulsionActive ? baseMultiplier * 2 : baseMultiplier;
-            multiplierUI.innerText = 'X' + currentMultiplier; multiplierUI.style.color = isPropulsionActive ? '#ffaa00' : '#88c0d0'; multiplierUI.style.textShadow = isPropulsionActive ? '0 0 20px #ff0000' : '0 0 10px #88c0d0';
+            multiplierUI.innerText = 'X' + currentMultiplier; 
+            multiplierUI.style.color = isPropulsionActive ? '#ffaa00' : '#88c0d0'; 
+            multiplierUI.style.textShadow = isPropulsionActive ? '0 0 20px #ff0000' : '0 0 10px #88c0d0';
+            
             specialBar.style.width = propulsion + '%';
-            if (propulsion >= MAX_PROPULSION && !isPropulsionActive) { specialContainer.classList.add('special-ready'); specialHint.style.opacity = 1; } else { specialContainer.classList.remove('special-ready'); specialHint.style.opacity = 0; }
+            if (propulsion >= MAX_PROPULSION && !isPropulsionActive) { 
+                specialContainer.classList.add('special-ready'); specialHint.style.opacity = 1; 
+            } else { 
+                specialContainer.classList.remove('special-ready'); specialHint.style.opacity = 0; 
+            }
         }
 
         function drawBacilo(ctx, x, y, color) { ctx.fillStyle = color; ctx.shadowBlur = 15; ctx.shadowColor = color; ctx.beginPath(); ctx.ellipse(x, y, 22, 45, Math.PI / 4, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#fff'; ctx.shadowBlur = 0; ctx.beginPath(); ctx.ellipse(x, y, 8, 20, Math.PI / 4, 0, Math.PI * 2); ctx.fill(); }
@@ -442,15 +616,24 @@
 
         function updateMotor() {
             try {
-                ctx.clearRect(0, 0, canvas.width, canvas.height); let currentTime = getAudioTime();
+                ctx.clearRect(0, 0, canvas.width, canvas.height); 
+                let currentTime = getAudioTime();
 
                 if (isPlaying) {
-                    if (currentTime > 0.1 && !firstBeatInitialized) { firstBeatInitialized = true; nextBeatTime = currentTime + lookAheadTime; }
+                    // Espera o timer da música começar a andar positivamente
+                    if (currentTime > 0.05 && !firstBeatInitialized) { 
+                        firstBeatInitialized = true; 
+                        let spawnIntervalSec = baseBeatSec * beatMultiplier;
+                        // Alinha o primeiro note exatamente no tempo da música para cair perfeitamente na grid
+                        nextBeatTime = Math.ceil((currentTime + lookAheadTime) / spawnIntervalSec) * spawnIntervalSec; 
+                    }
                     if (firstBeatInitialized) {
                         let spawnIntervalSec = baseBeatSec * beatMultiplier;
                         while (nextBeatTime < currentTime + lookAheadTime) {
                             let numNotesToSpawn = 1;
-                            if (Math.random() < chordProb && maxChordNotes > 1) numNotesToSpawn = Math.floor(Math.random() * (maxChordNotes - 1)) + 2;
+                            if (Math.random() < chordProb && maxChordNotes > 1) {
+                                numNotesToSpawn = Math.floor(Math.random() * (maxChordNotes - 1)) + 2;
+                            }
                             let usedLanes = [];
                             for(let k=0; k<numNotesToSpawn; k++) {
                                 let validLanes = []; for(let l=0; l<numLanes; l++) validLanes.push(l);
@@ -458,7 +641,8 @@
                                 if (availableLanes.length === 0) break; 
                                 
                                 let laneIndex = availableLanes[Math.floor(Math.random() * availableLanes.length)]; usedLanes.push(laneIndex);
-                                let isHold = Math.random() < holdProb; let duration = isHold ? (Math.random() * 1.5 + 0.5) : 0; 
+                                let isHold = Math.random() < holdProb; 
+                                let duration = isHold ? (Math.random() * 1.5 + 0.5) : 0; 
                                 if (isHold) laneOccupiedUntil[laneIndex] = nextBeatTime + duration;
                                 notes.push({ targetTime: nextBeatTime, endTime: nextBeatTime + duration, duration: duration, lane: laneIndex, config: fullLaneConfig[laneIndex], isHeld: false });
                             }
@@ -467,30 +651,57 @@
                     }
                 }
 
-                if (isPropulsionActive) { ctx.fillStyle = 'rgba(255, 0, 0, 0.15)'; ctx.fillRect(0, 0, canvas.width, canvas.height); propulsion -= 0.12; if (propulsion <= 0) { propulsion = 0; isPropulsionActive = false; } updateUI(); }
+                if (isPropulsionActive) { 
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.15)'; ctx.fillRect(0, 0, canvas.width, canvas.height); 
+                    propulsion -= 0.12; 
+                    if (propulsion <= 0) { propulsion = 0; isPropulsionActive = false; } 
+                    updateUI(); 
+                }
 
                 fretOffset += (speedFactor / 60); if (fretOffset > 250) fretOffset = 0; 
                 ctx.strokeStyle = isPropulsionActive ? 'rgba(255, 100, 100, 0.4)' : 'rgba(255, 255, 255, 0.15)'; ctx.lineWidth = 5;
-                for (let y = fretOffset - 250; y < canvas.height; y += 250) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
-                for(let i = 1; i < numLanes; i++) { ctx.strokeStyle = isPropulsionActive ? '#ff0000' : 'rgba(255, 255, 255, 0.5)'; ctx.shadowBlur = isPropulsionActive ? 25 : 10; ctx.shadowColor = isPropulsionActive ? '#ff0000' : '#fff'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(i * laneWidth, 0); ctx.lineTo(i * laneWidth, canvas.height); ctx.stroke(); } ctx.shadowBlur = 0; 
+                for (let y = fretOffset - 250; y < canvas.height; y += 250) { 
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); 
+                }
+                
+                for(let i = 1; i < numLanes; i++) { 
+                    ctx.strokeStyle = isPropulsionActive ? '#ff0000' : 'rgba(255, 255, 255, 0.5)'; 
+                    ctx.shadowBlur = isPropulsionActive ? 25 : 10; ctx.shadowColor = isPropulsionActive ? '#ff0000' : '#fff'; 
+                    ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(i * laneWidth, 0); ctx.lineTo(i * laneWidth, canvas.height); ctx.stroke(); 
+                } 
+                ctx.shadowBlur = 0; 
 
                 for (let i = 0; i < numLanes; i++) {
                     const laneCenter = (i * laneWidth) + (laneWidth / 2);
-                    ctx.strokeStyle = fullLaneConfig[i].color; ctx.lineWidth = activeKeys[i] ? 15 : 6; ctx.shadowBlur = activeKeys[i] ? 30 : 10; ctx.shadowColor = fullLaneConfig[i].color;
+                    ctx.strokeStyle = fullLaneConfig[i].color; ctx.lineWidth = activeKeys[i] ? 15 : 6; 
+                    ctx.shadowBlur = activeKeys[i] ? 30 : 10; ctx.shadowColor = fullLaneConfig[i].color;
                     ctx.beginPath(); ctx.ellipse(laneCenter, hitZoneY, 65, 30, 0, 0, Math.PI * 2); ctx.stroke(); ctx.shadowBlur = 0;
-                    if (activeKeys[i]) { let grad = ctx.createLinearGradient(0, hitZoneY, 0, 0); grad.addColorStop(0, fullLaneConfig[i].color); grad.addColorStop(1, 'transparent'); ctx.fillStyle = grad; ctx.globalAlpha = 0.8; ctx.fillRect(i * laneWidth, 0, laneWidth, hitZoneY); ctx.globalAlpha = 1.0; }
+                    
+                    if (activeKeys[i]) { 
+                        let grad = ctx.createLinearGradient(0, hitZoneY, 0, 0); 
+                        grad.addColorStop(0, fullLaneConfig[i].color); grad.addColorStop(1, 'transparent'); 
+                        ctx.fillStyle = grad; ctx.globalAlpha = 0.8; ctx.fillRect(i * laneWidth, 0, laneWidth, hitZoneY); ctx.globalAlpha = 1.0; 
+                    }
+                    
                     let keyLetter = keysConfig[i] ? keysConfig[i].toUpperCase() : '';
                     if(keyLetter === 'ARROWUP') keyLetter = '↑'; if(keyLetter === 'ARROWDOWN') keyLetter = '↓';
-                    ctx.fillStyle = activeKeys[i] ? '#ffffff' : 'rgba(255, 255, 255, 0.5)'; ctx.font = 'bold 50px "Segoe UI"'; ctx.textAlign = 'center'; ctx.fillText(keyLetter, laneCenter, hitZoneY + 15); ctx.textAlign = 'left'; 
+                    ctx.fillStyle = activeKeys[i] ? '#ffffff' : 'rgba(255, 255, 255, 0.5)'; 
+                    ctx.font = 'bold 50px "Segoe UI"'; ctx.textAlign = 'center'; ctx.fillText(keyLetter, laneCenter, hitZoneY + 15); ctx.textAlign = 'left'; 
                 }
 
                 for (let i = 0; i < notes.length; i++) {
-                    let note = notes[i]; let timeDifference = note.targetTime - currentTime; let noteX = (note.lane * laneWidth) + (laneWidth / 2); 
+                    let note = notes[i]; let timeDifference = note.targetTime - currentTime; 
+                    let noteX = (note.lane * laneWidth) + (laneWidth / 2); 
+                    
                     if (note.isHeld) {
-                        note.y = hitZoneY; let currentMultiplier = isPropulsionActive ? baseMultiplier * 2 : baseMultiplier; score += 2 * currentMultiplier; 
+                        note.y = hitZoneY; 
+                        let currentMultiplier = isPropulsionActive ? baseMultiplier * 2 : baseMultiplier; 
+                        score += 2 * currentMultiplier; 
                         if (currentTime >= note.endTime) { 
                             hitEffects.push({text: 'SUSTAIN OK!', x: noteX, y: hitZoneY - 80, color: note.config.color, life: 30}); 
-                            notes.splice(i, 1); i--; requestAnimationFrame(updateUI); enviarRede({acao: 'HIT', score: score, combo: combo}); continue; 
+                            notes.splice(i, 1); i--; 
+                            updateUI(); enviarRede({acao: 'HIT', score: score, combo: combo}); 
+                            continue; 
                         }
                     } else {
                         note.y = hitZoneY - (timeDifference * speedFactor);
@@ -500,24 +711,35 @@
                     }
 
                     if (note.duration > 0) {
-                        let tailTopY = hitZoneY - ((note.endTime - currentTime) * speedFactor); let startY = note.isHeld ? hitZoneY : note.y;
-                        ctx.fillStyle = note.config.color; ctx.globalAlpha = note.isHeld ? 0.9 : 0.5; if (tailTopY < 0) tailTopY = 0;
+                        let tailTopY = hitZoneY - ((note.endTime - currentTime) * speedFactor); 
+                        let startY = note.isHeld ? hitZoneY : note.y;
+                        ctx.fillStyle = note.config.color; ctx.globalAlpha = note.isHeld ? 0.9 : 0.5; 
+                        if (tailTopY < 0) tailTopY = 0;
                         ctx.beginPath(); ctx.roundRect(noteX - 15, tailTopY, 30, startY - tailTopY, 15); ctx.fill();
-                        ctx.fillStyle = '#fff'; ctx.globalAlpha = note.isHeld ? 0.8 : 0.3; ctx.beginPath(); ctx.roundRect(noteX - 5, tailTopY + 5, 10, startY - tailTopY - 10, 5); ctx.fill(); ctx.globalAlpha = 1.0;
+                        ctx.fillStyle = '#fff'; ctx.globalAlpha = note.isHeld ? 0.8 : 0.3; 
+                        ctx.beginPath(); ctx.roundRect(noteX - 5, tailTopY + 5, 10, startY - tailTopY - 10, 5); ctx.fill(); ctx.globalAlpha = 1.0;
                     }
 
                     if (noteStyle === 'desenho') {
                         if (note.config.type === 'bacilo') drawBacilo(ctx, noteX, note.y, note.config.color);
                         else if (note.config.type === 'virus') drawVirus(ctx, noteX, note.y, note.config.color);
                         else if (note.config.type === 'sauron') drawSauron(ctx, noteX, note.y);
-                    } else drawTracinho(ctx, noteX, note.y, note.config.color);
+                    } else {
+                        drawTracinho(ctx, noteX, note.y, note.config.color);
+                    }
                 }
 
                 for (let i = 0; i < hitEffects.length; i++) {
-                    let effect = hitEffects[i]; ctx.fillStyle = '#fff'; ctx.font = 'bold 70px "Segoe UI"'; ctx.textAlign = 'center'; ctx.shadowBlur = 25; ctx.shadowColor = effect.color; ctx.lineWidth = 4; ctx.strokeStyle = '#000'; ctx.strokeText(effect.text, effect.x, effect.y); ctx.fillText(effect.text, effect.x, effect.y); ctx.shadowBlur = 0; effect.y -= 3; effect.life--; if (effect.life <= 0) { hitEffects.splice(i, 1); i--; }
+                    let effect = hitEffects[i]; 
+                    ctx.fillStyle = '#fff'; ctx.font = 'bold 70px "Segoe UI"'; ctx.textAlign = 'center'; 
+                    ctx.shadowBlur = 25; ctx.shadowColor = effect.color; ctx.lineWidth = 4; ctx.strokeStyle = '#000'; 
+                    ctx.strokeText(effect.text, effect.x, effect.y); ctx.fillText(effect.text, effect.x, effect.y); ctx.shadowBlur = 0; 
+                    effect.y -= 3; effect.life--; 
+                    if (effect.life <= 0) { hitEffects.splice(i, 1); i--; }
                 }
                 ctx.textAlign = 'left';
             } catch (err) { console.error("Erro Gráfico", err); }
+            
             animationFrameId = requestAnimationFrame(updateMotor);
         }
 
@@ -528,13 +750,18 @@
                 if (note.lane === laneIndex && diffTime <= hitWindow) { 
                     combo++; if (combo > maxCombo) maxCombo = combo;
                     if (!isPropulsionActive) propulsion = Math.min(100, propulsion + 3.5);
-                    let pts = diffTime < 0.05 ? 20 : (diffTime < 0.10 ? 10 : 5); let txt = diffTime < 0.05 ? 'PERFECT!' : (diffTime < 0.10 ? 'GOOD!' : 'OK');
+                    
+                    let pts = diffTime < 0.05 ? 20 : (diffTime < 0.10 ? 10 : 5); 
+                    let txt = diffTime < 0.05 ? 'PERFECT!' : (diffTime < 0.10 ? 'GOOD!' : 'OK');
                     if (diffTime < 0.05) stats.perfect++; else if (diffTime < 0.10) stats.good++; else stats.ok++; 
+                    
                     if (combo >= 30) baseMultiplier = 4; else if (combo >= 15) baseMultiplier = 3; else if (combo >= 5) baseMultiplier = 2;
                     score += (pts * (isPropulsionActive ? baseMultiplier * 2 : baseMultiplier));
+                    
                     hitEffects.push({ text: txt, x: (laneIndex * laneWidth) + (laneWidth / 2), y: hitZoneY - 80, color: isPropulsionActive ? '#ff0000' : note.config.color, life: 30 });
                     if (note.duration > 0) note.isHeld = true; else notes.splice(i, 1); 
-                    requestAnimationFrame(updateUI); enviarRede({acao: 'HIT', score: score, combo: combo});
+                    
+                    updateUI(); enviarRede({acao: 'HIT', score: score, combo: combo});
                     break; 
                 }
             }
@@ -549,13 +776,21 @@
                 if (tapTimes.length >= 2) {
                     let sum = 0; for (let i = 1; i < tapTimes.length; i++) sum += (tapTimes[i] - tapTimes[i-1]);
                     let avgInterval = sum / (tapTimes.length - 1); let newBpm = Math.round(60 / avgInterval);
-                    if (newBpm >= 60 && newBpm <= 300) { bpm = newBpm; baseBeatSec = avgInterval; nextBeatTime = now + lookAheadTime; syncFlash.style.display = 'block'; setTimeout(() => syncFlash.style.display = 'none', 100); }
+                    if (newBpm >= 60 && newBpm <= 300) { 
+                        bpm = newBpm; baseBeatSec = avgInterval; 
+                        nextBeatTime = Math.ceil((currentTime + lookAheadTime) / baseBeatSec) * baseBeatSec; 
+                        syncFlash.style.display = 'block'; setTimeout(() => syncFlash.style.display = 'none', 100); 
+                    }
                 }
                 return;
             }
 
             if (key === ' ') {
-                e.preventDefault(); if (propulsion >= MAX_PROPULSION && !isPropulsionActive) { isPropulsionActive = true; requestAnimationFrame(updateUI); enviarRede({acao: 'SPECIAL'}); } return;
+                e.preventDefault(); 
+                if (propulsion >= MAX_PROPULSION && !isPropulsionActive) { 
+                    isPropulsionActive = true; updateUI(); enviarRede({acao: 'SPECIAL'}); 
+                } 
+                return;
             }
 
             let laneIndex = keysConfig.indexOf(key);
@@ -583,7 +818,9 @@
                     let note = notes[i];
                     if (note.lane === laneIndex && note.isHeld) {
                         if (note.endTime - getAudioTime() > 0.15) { 
-                            combo = 0; baseMultiplier = 1; stats.miss++; hitEffects.push({text: 'DROPPED!', x: (note.lane * laneWidth) + (laneWidth / 2), y: hitZoneY - 80, color: '#ff0000', life: 30}); updateUI(); enviarRede({acao: 'MISS'});
+                            combo = 0; baseMultiplier = 1; stats.miss++; 
+                            hitEffects.push({text: 'DROPPED!', x: (note.lane * laneWidth) + (laneWidth / 2), y: hitZoneY - 80, color: '#ff0000', life: 30}); 
+                            updateUI(); enviarRede({acao: 'MISS'});
                         }
                         notes.splice(i, 1); break;
                     }
@@ -591,7 +828,8 @@
             }
         });
 
-        setOnlineMode(false); setNoteStyle('desenho'); setDifficulty('Médio');
+        setOnlineMode(false); 
+        setDifficulty('Médio');
     </script>
 </body>
 </html>
