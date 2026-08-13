@@ -266,6 +266,8 @@
         const specialContainer = document.getElementById('special-container'); const specialHint = document.getElementById('special-hint');
 
         let isPlaying = false; let isOnline = false; let socket = null; let animationFrameId = null;
+        let globalFrameCount = 0; // Utilizado para limitar atualizações do DOM
+        let lastObjectUrl = null; // Para previnir vazamento de memória em MP3s seguidos
         
         let myPlayerId = 1; let playlist = [null, null]; 
         let myReady = false; let oppReady = false; let currentRound = 0; 
@@ -298,7 +300,7 @@
         ];
 
         // -------------------------------------------------------------
-        // SISTEMA DE CACHE DE SPRITES (O SEGREDO DA FLUIDEZ OTIMIZADA)
+        // SISTEMA DE CACHE DE SPRITES
         // -------------------------------------------------------------
         const spritesDesenho = [];
         const spritesTracinho = [];
@@ -309,10 +311,8 @@
         function drawTracinho(cx, x, y, color) { cx.fillStyle = color; cx.shadowBlur = 25; cx.shadowColor = color; cx.fillRect(x - 55, y - 12, 110, 24); cx.fillStyle = '#fff'; cx.shadowBlur = 0; cx.fillRect(x - 40, y - 5, 80, 10); }
 
         function preRenderSprites() {
-            for (let i = 0; i < 5; i++) { // Renderiza as 5 pistas na memória
+            for (let i = 0; i < 5; i++) { 
                 let conf = fullLaneConfig[i];
-                
-                // Cache Desenho
                 let cDes = document.createElement('canvas');
                 cDes.width = 160; cDes.height = 160;
                 let cxDes = cDes.getContext('2d');
@@ -321,7 +321,6 @@
                 else if (conf.type === 'sauron') drawSauron(cxDes, 80, 80);
                 spritesDesenho.push(cDes);
 
-                // Cache Tracinho
                 let cTra = document.createElement('canvas');
                 cTra.width = 160; cTra.height = 80;
                 let cxTra = cTra.getContext('2d');
@@ -329,8 +328,7 @@
                 spritesTracinho.push(cTra);
             }
         }
-        preRenderSprites(); // Executa logo ao iniciar
-        // -------------------------------------------------------------
+        preRenderSprites(); 
         
         let tapTimes = []; let laneOccupiedUntil = [0, 0, 0, 0, 0]; 
         let notes = []; let fretOffset = 0; let hitEffects = []; 
@@ -474,9 +472,9 @@
                     baseBeatSec = 60 / bpm; 
                     audioMode = 'mp3'; 
                     
-                    if (!audio.src || !audio.src.startsWith('blob:')) {
-                        audio.src = URL.createObjectURL(fileInput.files[0]);
-                    }
+                    if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl); // Impede vazamento de memória do navegador!
+                    lastObjectUrl = URL.createObjectURL(fileInput.files[0]);
+                    audio.src = lastObjectUrl;
                     
                     audio.play().then(() => {
                         startGameMotor();
@@ -494,7 +492,6 @@
             if (file) {
                 if (ytPlayer && typeof ytPlayer.stopVideo === 'function') ytPlayer.stopVideo();
                 audioMode = 'mp3';
-                audio.src = URL.createObjectURL(file);
                 document.getElementById('soloYtInput').value = ''; 
             }
         });
@@ -637,8 +634,7 @@
 
         function updateMotor() {
             try {
-                // Remove qualquer rastro de blur residual antes de limpar a tela
-                ctx.shadowBlur = 0;
+                globalFrameCount++;
                 ctx.clearRect(0, 0, canvas.width, canvas.height); 
                 let currentTime = getAudioTime();
 
@@ -650,7 +646,17 @@
                     }
                     if (firstBeatInitialized) {
                         let spawnIntervalSec = baseBeatSec * beatMultiplier;
+                        
+                        // O CINTO DE SEGURANÇA: Previne o Loop Infinito se a música engasgar
+                        let safetyCounter = 0;
                         while (nextBeatTime < currentTime + lookAheadTime) {
+                            safetyCounter++;
+                            if(safetyCounter > 30) {
+                                // O navegador engasgou e a música andou muito rápido. Aborta o burst de notas e sincroniza forçado!
+                                nextBeatTime = currentTime + lookAheadTime;
+                                break;
+                            }
+
                             let numNotesToSpawn = 1;
                             if (Math.random() < chordProb && maxChordNotes > 1) {
                                 numNotesToSpawn = Math.floor(Math.random() * (maxChordNotes - 1)) + 2;
@@ -675,8 +681,13 @@
                 if (isPropulsionActive) { 
                     ctx.fillStyle = 'rgba(255, 0, 0, 0.15)'; ctx.fillRect(0, 0, canvas.width, canvas.height); 
                     propulsion -= 0.12; 
-                    if (propulsion <= 0) { propulsion = 0; isPropulsionActive = false; } 
-                    updateUI(); 
+                    
+                    if (propulsion <= 0) { 
+                        propulsion = 0; isPropulsionActive = false; updateUI(); 
+                    } else if (globalFrameCount % 10 === 0) {
+                        // CONTROLE DE GARGALO DO DOM: Atualiza os números da tela apenas a cada 10 frames (evita CPU 100%)
+                        updateUI();
+                    }
                 }
 
                 // Renderiza a Grade sem cálculos de sombras pesados
@@ -694,15 +705,23 @@
                 for (let i = 0; i < numLanes; i++) {
                     const laneCenter = (i * laneWidth) + (laneWidth / 2);
                     ctx.strokeStyle = fullLaneConfig[i].color; ctx.lineWidth = activeKeys[i] ? 15 : 6; 
-                    // Limitar o cálculo da sombra apenas para quando a tecla está de fato pressionada
-                    ctx.shadowBlur = activeKeys[i] ? 20 : 0; ctx.shadowColor = activeKeys[i] ? fullLaneConfig[i].color : 'transparent';
                     
-                    ctx.beginPath(); ctx.ellipse(laneCenter, hitZoneY, 65, 30, 0, 0, Math.PI * 2); ctx.stroke(); ctx.shadowBlur = 0;
+                    ctx.beginPath(); ctx.ellipse(laneCenter, hitZoneY, 65, 30, 0, 0, Math.PI * 2); ctx.stroke(); 
                     
                     if (activeKeys[i]) { 
+                        // MÁGICA DE PERFORMANCE (SEM SHADOWBLUR)
+                        // Simula neon brilhante sobrepondo cor translúcida com a luz 'lighter' do Canvas
+                        ctx.globalCompositeOperation = 'lighter';
+                        ctx.fillStyle = fullLaneConfig[i].color;
+                        ctx.globalAlpha = 0.4;
+                        ctx.beginPath(); ctx.ellipse(laneCenter, hitZoneY, 85, 45, 0, 0, Math.PI * 2); ctx.fill();
+                        
                         let grad = ctx.createLinearGradient(0, hitZoneY, 0, 0); 
                         grad.addColorStop(0, fullLaneConfig[i].color); grad.addColorStop(1, 'transparent'); 
-                        ctx.fillStyle = grad; ctx.globalAlpha = 0.8; ctx.fillRect(i * laneWidth, 0, laneWidth, hitZoneY); ctx.globalAlpha = 1.0; 
+                        ctx.fillStyle = grad; ctx.globalAlpha = 0.7; ctx.fillRect(i * laneWidth, 0, laneWidth, hitZoneY); 
+                        
+                        ctx.globalAlpha = 1.0; 
+                        ctx.globalCompositeOperation = 'source-over'; // Retorna ao normal para não bugar o resto
                     }
                     
                     let keyLetter = keysConfig[i] ? keysConfig[i].toUpperCase() : '';
@@ -711,9 +730,6 @@
                     ctx.font = 'bold 50px "Segoe UI"'; ctx.textAlign = 'center'; ctx.fillText(keyLetter, laneCenter, hitZoneY + 15); ctx.textAlign = 'left'; 
                 }
 
-                // Garantia total que nada herdará sombra nas próximas renderizações
-                ctx.shadowBlur = 0;
-
                 for (let i = 0; i < notes.length; i++) {
                     let note = notes[i]; let timeDifference = note.targetTime - currentTime; 
                     let noteX = (note.lane * laneWidth) + (laneWidth / 2); 
@@ -721,11 +737,17 @@
                     if (note.isHeld) {
                         note.y = hitZoneY; 
                         let currentMultiplier = isPropulsionActive ? baseMultiplier * 2 : baseMultiplier; 
+                        
+                        // Incrementa o placar gradualmente a cada frame sem destruir o DOM!
                         score += 2 * currentMultiplier; 
+                        if (globalFrameCount % 10 === 0) updateUI();
+                        
                         if (currentTime >= note.endTime) { 
                             hitEffects.push({text: 'SUSTAIN OK!', x: noteX, y: hitZoneY - 80, color: note.config.color, life: 30}); 
                             notes.splice(i, 1); i--; 
-                            if(i % 5 === 0) { updateUI(); enviarRede({acao: 'HIT', score: score, combo: combo}); }
+                            
+                            // Avisa a rede só no final da nota, economizando internet
+                            updateUI(); enviarRede({acao: 'HIT', score: score, combo: combo}); 
                             continue; 
                         }
                     } else {
@@ -745,7 +767,7 @@
                         ctx.beginPath(); ctx.roundRect(noteX - 5, tailTopY + 5, 10, startY - tailTopY - 10, 5); ctx.fill(); ctx.globalAlpha = 1.0;
                     }
 
-                    // A MÁGICA ACONTECE AQUI: Em vez de recalcular vetores e blur, apenas 'carimbamos' a imagem já renderizada no cache
+                    // Carimbando do Cache Seguro
                     if (noteStyle === 'desenho') {
                         ctx.drawImage(spritesDesenho[note.lane], noteX - 80, note.y - 80);
                     } else {
@@ -756,16 +778,17 @@
                 for (let i = 0; i < hitEffects.length; i++) {
                     let effect = hitEffects[i]; 
                     ctx.font = 'bold 70px "Segoe UI"'; ctx.textAlign = 'center'; 
-                    // O contorno estrito sem blur é 10x mais rápido que calcular brilho no texto em movimento
+                    // Removido shadow blur do texto! O texto fica nítido e mil vezes mais leve para a CPU.
                     ctx.lineWidth = 4; ctx.strokeStyle = '#000'; 
                     ctx.strokeText(effect.text, effect.x, effect.y); 
                     ctx.fillStyle = effect.color;
                     ctx.fillText(effect.text, effect.x, effect.y);
+                    
                     effect.y -= 3; effect.life--; 
                     if (effect.life <= 0) { hitEffects.splice(i, 1); i--; }
                 }
                 ctx.textAlign = 'left';
-            } catch (err) { console.error("Erro Gráfico", err); }
+            } catch (err) { console.error("Erro Gráfico Prevenido:", err); } // Previne que o jogo pare se der falha em um único frame
             
             animationFrameId = requestAnimationFrame(updateMotor);
         }
