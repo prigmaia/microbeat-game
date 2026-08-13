@@ -266,8 +266,8 @@
         const specialContainer = document.getElementById('special-container'); const specialHint = document.getElementById('special-hint');
 
         let isPlaying = false; let isOnline = false; let socket = null; let animationFrameId = null;
-        let globalFrameCount = 0; // Utilizado para limitar atualizações do DOM
-        let lastObjectUrl = null; // Para previnir vazamento de memória em MP3s seguidos
+        let globalFrameCount = 0; 
+        let lastObjectUrl = null; 
         
         let myPlayerId = 1; let playlist = [null, null]; 
         let myReady = false; let oppReady = false; let currentRound = 0; 
@@ -287,7 +287,7 @@
         let numLanes = 4;
         let laneWidth = canvas.width / numLanes;
         const hitZoneY = 1050; 
-        let speedFactor = 800; let hitWindow = 0.15; let beatMultiplier = 1; 
+        let speedFactor = 800; let hitWindow = 0.30; let beatMultiplier = 1; 
         let holdProb = 0.15; let chordProb = 0.15; let maxChordNotes = 2; 
         let isExpertMode = false;
         
@@ -392,14 +392,15 @@
             });
             isExpertMode = false;
             
+            // ATUALIZAÇÃO DA JANELA DE ACERTO (MAIS LARGA EM TODOS OS MODOS)
             if (level === 'Fácil') { 
-                numLanes = 3; speedFactor = 600; hitWindow = 0.20; beatMultiplier = 2; holdProb = 0.05; chordProb = 0.05; maxChordNotes = 2; 
+                numLanes = 3; speedFactor = 600; hitWindow = 0.35; beatMultiplier = 2; holdProb = 0.05; chordProb = 0.05; maxChordNotes = 2; 
             } else if (level === 'Médio') { 
-                numLanes = 4; speedFactor = 800; hitWindow = 0.15; beatMultiplier = 1; holdProb = 0.15; chordProb = 0.25; maxChordNotes = 2; 
+                numLanes = 4; speedFactor = 800; hitWindow = 0.30; beatMultiplier = 1; holdProb = 0.15; chordProb = 0.25; maxChordNotes = 2; 
             } else if (level === 'Difícil') { 
-                numLanes = 5; speedFactor = 1200; hitWindow = 0.10; beatMultiplier = 0.5; holdProb = 0.25; chordProb = 0.40; maxChordNotes = 3; 
+                numLanes = 5; speedFactor = 1200; hitWindow = 0.25; beatMultiplier = 0.5; holdProb = 0.25; chordProb = 0.40; maxChordNotes = 3; 
             } else if (level === 'Expert') { 
-                numLanes = 5; speedFactor = 1800; hitWindow = 0.06; beatMultiplier = 0.25; holdProb = 0.35; chordProb = 0.60; maxChordNotes = 4; isExpertMode = true; 
+                numLanes = 5; speedFactor = 1800; hitWindow = 0.20; beatMultiplier = 0.25; holdProb = 0.35; chordProb = 0.60; maxChordNotes = 4; isExpertMode = true; 
             }
             laneWidth = canvas.width / numLanes;
             lookAheadTime = (hitZoneY / speedFactor) + 0.1;
@@ -472,7 +473,7 @@
                     baseBeatSec = 60 / bpm; 
                     audioMode = 'mp3'; 
                     
-                    if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl); // Impede vazamento de memória do navegador!
+                    if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl);
                     lastObjectUrl = URL.createObjectURL(fileInput.files[0]);
                     audio.src = lastObjectUrl;
                     
@@ -647,12 +648,10 @@
                     if (firstBeatInitialized) {
                         let spawnIntervalSec = baseBeatSec * beatMultiplier;
                         
-                        // O CINTO DE SEGURANÇA: Previne o Loop Infinito se a música engasgar
                         let safetyCounter = 0;
                         while (nextBeatTime < currentTime + lookAheadTime) {
                             safetyCounter++;
                             if(safetyCounter > 30) {
-                                // O navegador engasgou e a música andou muito rápido. Aborta o burst de notas e sincroniza forçado!
                                 nextBeatTime = currentTime + lookAheadTime;
                                 break;
                             }
@@ -685,12 +684,10 @@
                     if (propulsion <= 0) { 
                         propulsion = 0; isPropulsionActive = false; updateUI(); 
                     } else if (globalFrameCount % 10 === 0) {
-                        // CONTROLE DE GARGALO DO DOM: Atualiza os números da tela apenas a cada 10 frames (evita CPU 100%)
                         updateUI();
                     }
                 }
 
-                // Renderiza a Grade sem cálculos de sombras pesados
                 fretOffset += (speedFactor / 60); if (fretOffset > 250) fretOffset = 0; 
                 ctx.strokeStyle = isPropulsionActive ? 'rgba(255, 100, 100, 0.4)' : 'rgba(255, 255, 255, 0.15)'; ctx.lineWidth = 5;
                 for (let y = fretOffset - 250; y < canvas.height; y += 250) { 
@@ -709,8 +706,6 @@
                     ctx.beginPath(); ctx.ellipse(laneCenter, hitZoneY, 65, 30, 0, 0, Math.PI * 2); ctx.stroke(); 
                     
                     if (activeKeys[i]) { 
-                        // MÁGICA DE PERFORMANCE (SEM SHADOWBLUR)
-                        // Simula neon brilhante sobrepondo cor translúcida com a luz 'lighter' do Canvas
                         ctx.globalCompositeOperation = 'lighter';
                         ctx.fillStyle = fullLaneConfig[i].color;
                         ctx.globalAlpha = 0.4;
@@ -721,7 +716,7 @@
                         ctx.fillStyle = grad; ctx.globalAlpha = 0.7; ctx.fillRect(i * laneWidth, 0, laneWidth, hitZoneY); 
                         
                         ctx.globalAlpha = 1.0; 
-                        ctx.globalCompositeOperation = 'source-over'; // Retorna ao normal para não bugar o resto
+                        ctx.globalCompositeOperation = 'source-over'; 
                     }
                     
                     let keyLetter = keysConfig[i] ? keysConfig[i].toUpperCase() : '';
@@ -738,7 +733,6 @@
                         note.y = hitZoneY; 
                         let currentMultiplier = isPropulsionActive ? baseMultiplier * 2 : baseMultiplier; 
                         
-                        // Incrementa o placar gradualmente a cada frame sem destruir o DOM!
                         score += 2 * currentMultiplier; 
                         if (globalFrameCount % 10 === 0) updateUI();
                         
@@ -746,7 +740,6 @@
                             hitEffects.push({text: 'SUSTAIN OK!', x: noteX, y: hitZoneY - 80, color: note.config.color, life: 30}); 
                             notes.splice(i, 1); i--; 
                             
-                            // Avisa a rede só no final da nota, economizando internet
                             updateUI(); enviarRede({acao: 'HIT', score: score, combo: combo}); 
                             continue; 
                         }
@@ -767,7 +760,6 @@
                         ctx.beginPath(); ctx.roundRect(noteX - 5, tailTopY + 5, 10, startY - tailTopY - 10, 5); ctx.fill(); ctx.globalAlpha = 1.0;
                     }
 
-                    // Carimbando do Cache Seguro
                     if (noteStyle === 'desenho') {
                         ctx.drawImage(spritesDesenho[note.lane], noteX - 80, note.y - 80);
                     } else {
@@ -778,7 +770,6 @@
                 for (let i = 0; i < hitEffects.length; i++) {
                     let effect = hitEffects[i]; 
                     ctx.font = 'bold 70px "Segoe UI"'; ctx.textAlign = 'center'; 
-                    // Removido shadow blur do texto! O texto fica nítido e mil vezes mais leve para a CPU.
                     ctx.lineWidth = 4; ctx.strokeStyle = '#000'; 
                     ctx.strokeText(effect.text, effect.x, effect.y); 
                     ctx.fillStyle = effect.color;
@@ -788,7 +779,7 @@
                     if (effect.life <= 0) { hitEffects.splice(i, 1); i--; }
                 }
                 ctx.textAlign = 'left';
-            } catch (err) { console.error("Erro Gráfico Prevenido:", err); } // Previne que o jogo pare se der falha em um único frame
+            } catch (err) { console.error("Erro Gráfico Prevenido:", err); } 
             
             animationFrameId = requestAnimationFrame(updateMotor);
         }
@@ -801,9 +792,10 @@
                     combo++; if (combo > maxCombo) maxCombo = combo;
                     if (!isPropulsionActive) propulsion = Math.min(100, propulsion + 3.5);
                     
-                    let pts = diffTime < 0.05 ? 20 : (diffTime < 0.10 ? 10 : 5); 
-                    let txt = diffTime < 0.05 ? 'PERFECT!' : (diffTime < 0.10 ? 'GOOD!' : 'OK');
-                    if (diffTime < 0.05) stats.perfect++; else if (diffTime < 0.10) stats.good++; else stats.ok++; 
+                    // Ajustado para acompanhar a nova janela mais larga
+                    let pts = diffTime < 0.08 ? 20 : (diffTime < 0.15 ? 10 : 5); 
+                    let txt = diffTime < 0.08 ? 'PERFECT!' : (diffTime < 0.15 ? 'GOOD!' : 'OK');
+                    if (diffTime < 0.08) stats.perfect++; else if (diffTime < 0.15) stats.good++; else stats.ok++; 
                     
                     if (combo >= 30) baseMultiplier = 4; else if (combo >= 15) baseMultiplier = 3; else if (combo >= 5) baseMultiplier = 2;
                     score += (pts * (isPropulsionActive ? baseMultiplier * 2 : baseMultiplier));
