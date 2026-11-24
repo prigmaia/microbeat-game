@@ -371,7 +371,7 @@ const progressBar = $('progress-bar');
 // =====================================================================
 let isPlaying = false, paused = false, isOnline = false, socket = null;
 let animationFrameId = null, lastFrame = 0, globalFrameCount = 0, countdownTimer = null;
-let lastFileKey = null, analysisPending = false;
+let lastFileKey = null, lastObjectUrl = null, analysisPending = false;
 let myPlayerId = 1, playlist = [null, null], myReady = false, oppReady = false, currentRound = 0;
 let p2Score = 0, p2Combo = 0;
 
